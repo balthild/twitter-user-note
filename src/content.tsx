@@ -33,6 +33,7 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = () => ({
 export const getShadowHostId: PlasmoGetShadowHostId = () => 'twitter-user-note-shadow-host';
 
 export default function () {
+    // https://github.com/PlasmoHQ/plasmo/issues/1054
     useLayoutEffect(
         () => () => {
             styleCache.inserted = {};
@@ -72,16 +73,20 @@ export default function () {
         },
         () => {
             const username = location.pathname.split('/')[1].toLowerCase();
-            const scripts = document.querySelectorAll(
-                'script[data-testid="UserProfileSchema-test"]',
-            );
+            if (!username) {
+                return '';
+            }
+
+            const selector = 'script[data-testid="UserProfileSchema-test"]';
+            const scripts = document.querySelectorAll(selector);
+
             for (const script of scripts) {
                 const profile = JSON.parse(script?.textContent ?? null);
                 if (profile?.author?.additionalName?.toLowerCase() !== username) {
                     continue;
                 }
 
-                return profile?.author?.identifier ?? null;
+                return profile?.author?.identifier ?? '';
             }
 
             return '';

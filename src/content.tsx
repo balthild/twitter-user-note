@@ -2,14 +2,8 @@ import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useStorage } from '@plasmohq/storage/hook';
+import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetShadowHostId, PlasmoGetStyle } from 'plasmo';
 import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
-
-import type {
-    PlasmoCSConfig,
-    PlasmoGetInlineAnchor,
-    PlasmoGetShadowHostId,
-    PlasmoGetStyle,
-} from 'plasmo';
 import type { FormEventHandler, KeyboardEventHandler } from 'react';
 
 const styleElement = document.createElement('style');
@@ -34,12 +28,11 @@ export const getShadowHostId: PlasmoGetShadowHostId = () => 'twitter-user-note-s
 
 export default function () {
     // https://github.com/PlasmoHQ/plasmo/issues/1054
-    useLayoutEffect(
-        () => () => {
+    useLayoutEffect(() => {
+        return () => {
             styleCache.inserted = {};
-        },
-        [],
-    );
+        };
+    }, []);
 
     const userId = useSyncExternalStore(
         (callback) => {
@@ -93,7 +86,8 @@ export default function () {
         },
     );
 
-    const [noteValue, setNote, noteItem] = useStorage(userId ? `/notes/${userId}` : '');
+    const storageKey = userId ? `/notes/${userId}` : '';
+    const [noteValue, setNote, noteItem] = useStorage(storageKey);
 
     const [input, setInput] = useState('');
     const [editing, setEditing] = useState(false);
@@ -123,9 +117,15 @@ export default function () {
             return false;
         }
 
-        setInput(note);
+        setInput(note.trim());
         setEditing(true);
     };
+
+    const onBlur = () => {
+        if (editing && inputValue === noteValue) {
+            onCancel();
+        }
+    }
 
     const onCancel = () => {
         setEditing(false);
@@ -171,13 +171,15 @@ export default function () {
                     onKeyDown={onType}
                     onClick={onEdit}
                     onFocus={onEdit}
+                    onBlur={onBlur}
                     placeholder="Write a note..."
                     className={editing ? 'editing' : ''}
                     readOnly={!editing}
                     disabled={loading}
-                    value={inputValue}></Textarea>
+                    value={inputValue}
+                />
 
-                {editing && (
+                {editing && inputValue !== noteValue && (
                     <Actions>
                         <Button type="submit" disabled={loading}>
                             Save

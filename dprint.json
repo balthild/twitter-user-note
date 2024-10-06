@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "https://raw.githubusercontent.com/balthild/dotfiles/refs/heads/main/dprint/imporg.json",
+    "https://raw.githubusercontent.com/balthild/dotfiles/refs/heads/main/dprint/typescript.json",
+    "https://raw.githubusercontent.com/balthild/dotfiles/refs/heads/main/dprint/global.json"
+  ],
+  "includes": [
+    "src/**/*.{ts,tsx}"
+  ],
+  "typescript": {
+    "lineWidth": 120,
+    "indentWidth": 4
+  },
+  "plugins": []
+}

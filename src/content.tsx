@@ -117,7 +117,7 @@ export default function () {
             return false;
         }
 
-        setInput(note.trim());
+        setInput(note?.trim() ?? '');
         setEditing(true);
     };
 
@@ -148,7 +148,7 @@ export default function () {
 
     const inputId = useId();
     const inputRef = useRef<HTMLTextAreaElement>();
-    const inputValue = userId && (editing ? input : note?.trim() ?? '');
+    const inputValue = (userId && (editing ? input : note?.trim())) ?? '';
 
     useLayoutEffect(() => {
         if (!inputRef.current) {

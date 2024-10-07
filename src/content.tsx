@@ -87,14 +87,14 @@ export default function () {
     );
 
     const storageKey = userId ? `/notes/${userId}` : '';
-    const [noteValue, setNote, noteItem] = useStorage(storageKey);
+    const [note, setNote, noteItem] = useStorage(storageKey);
+    const noteText = (noteItem.isLoading ? '' : note?.trim()) ?? '';
 
     const [input, setInput] = useState('');
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    const note = noteItem.isLoading ? '' : noteValue;
-    const loading = noteItem.isLoading || saving;
+    const working = noteItem.isLoading || saving;
 
     useEffect(() => {
         setEditing(false);
@@ -113,19 +113,21 @@ export default function () {
     };
 
     const onEdit = () => {
-        if (!userId || editing || loading) {
+        if (!userId || editing || working) {
             return false;
         }
 
-        setInput(note?.trim() ?? '');
+        console.log(noteText, inputText);
+
+        setInput(noteText);
         setEditing(true);
     };
 
     const onBlur = () => {
-        if (editing && inputValue === noteValue) {
+        if (editing && inputText === note) {
             onCancel();
         }
-    }
+    };
 
     const onCancel = () => {
         setEditing(false);
@@ -148,7 +150,7 @@ export default function () {
 
     const inputId = useId();
     const inputRef = useRef<HTMLTextAreaElement>();
-    const inputValue = (userId && (editing ? input : note?.trim())) ?? '';
+    const inputText = userId ? (editing ? input : noteText) : '';
 
     useLayoutEffect(() => {
         if (!inputRef.current) {
@@ -157,7 +159,7 @@ export default function () {
 
         inputRef.current.style.height = 'unset';
         inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
-    }, [inputValue]);
+    }, [inputText]);
 
     return (
         <CacheProvider value={styleCache}>
@@ -175,16 +177,16 @@ export default function () {
                     placeholder="Write a note..."
                     className={editing ? 'editing' : ''}
                     readOnly={!editing}
-                    disabled={loading}
-                    value={inputValue}
+                    disabled={working}
+                    value={inputText}
                 />
 
-                {editing && inputValue !== noteValue && (
+                {editing && inputText !== noteText && (
                     <Actions>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={working}>
                             Save
                         </Button>
-                        <Button type="button" disabled={loading} onClick={onCancel}>
+                        <Button type="button" disabled={working} onClick={onCancel}>
                             Cancel
                         </Button>
                     </Actions>

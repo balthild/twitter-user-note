@@ -117,8 +117,6 @@ export default function () {
             return false;
         }
 
-        console.log(noteText, inputText);
-
         setInput(noteText);
         setEditing(true);
     };

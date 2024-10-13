@@ -15,18 +15,19 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@plasmohq/storage": "^1.11.0",
-    "plasmo": "0.89.2",
+    "immer": "^10.1.1",
+    "plasmo": "0.89.3",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
     "@types/chrome": "0.0.277",
     "@types/dom-navigation": "^1.0.3",
-    "@types/node": "22.7.4",
+    "@types/node": "22.7.5",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
     "dprint": "^0.47.2",
-    "typescript": "5.6.2"
+    "typescript": "5.6.3"
   },
   "manifest": {
     "host_permissions": [

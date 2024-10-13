@@ -9,11 +9,8 @@
     "./**/*.tsx"
   ],
   "compilerOptions": {
-    "paths": {
-      "~*": [
-        "./src/*"
-      ]
-    },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "strict": true,
+    "strictNullChecks": true
   }
 }

@@ -1,10 +1,12 @@
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useStorage } from '@plasmohq/storage/hook';
 import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetShadowHostId, PlasmoGetStyle } from 'plasmo';
-import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEventHandler, KeyboardEventHandler } from 'react';
+
+import { useLocalRecord } from './record';
+import { useTwitterUser } from './twitter';
 
 const styleElement = document.createElement('style');
 
@@ -20,7 +22,7 @@ export const config: PlasmoCSConfig = {
 };
 
 export const getInlineAnchor: PlasmoGetInlineAnchor = () => ({
-    element: document.querySelector('[data-testid="UserName"]'),
+    element: document.querySelector('[data-testid="UserName"]')!,
     insertPosition: 'afterend',
 });
 
@@ -34,72 +36,24 @@ export default function () {
         };
     }, []);
 
-    const userId = useSyncExternalStore(
-        (callback) => {
-            window.navigation.addEventListener('navigatesuccess', callback);
-
-            const observer = new MutationObserver((updates) => {
-                for (const update of updates) {
-                    for (const node of update.addedNodes) {
-                        if (node instanceof HTMLScriptElement === false) {
-                            continue;
-                        }
-                        if (node.dataset.testid !== 'UserProfileSchema-test') {
-                            continue;
-                        }
-
-                        callback();
-
-                        return;
-                    }
-                }
-            });
-
-            observer.observe(document.head, {
-                childList: true,
-            });
-
-            return () => {
-                window.navigation.removeEventListener('navigatesuccess', callback);
-                observer.disconnect();
-            };
-        },
-        () => {
-            const username = location.pathname.split('/')[1].toLowerCase();
-            if (!username) {
-                return '';
-            }
-
-            const selector = 'script[data-testid="UserProfileSchema-test"]';
-            const scripts = document.querySelectorAll(selector);
-
-            for (const script of scripts) {
-                const profile = JSON.parse(script?.textContent ?? null);
-                if (profile?.author?.additionalName?.toLowerCase() !== username) {
-                    continue;
-                }
-
-                return profile?.author?.identifier ?? '';
-            }
-
-            return '';
-        },
-    );
-
-    const storageKey = userId ? `/notes/${userId}` : '';
-    const [note, setNote, noteItem] = useStorage(storageKey);
-    const noteText = (noteItem.isLoading ? '' : note?.trim()) ?? '';
+    const user = useTwitterUser();
+    const record = useLocalRecord(user);
 
     const [input, setInput] = useState('');
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    const working = noteItem.isLoading || saving;
+    const loading = !user || !record;
+    const working = loading || saving;
+
+    const noteText = record?.note ?? '';
+    const inputText = user ? (editing ? input : noteText) : '';
+    const dirty = inputText !== noteText;
 
     useEffect(() => {
         setEditing(false);
         setSaving(false);
-    }, [userId]);
+    }, [user?.id]);
 
     const onInput: FormEventHandler<HTMLTextAreaElement> = (e) => {
         e.preventDefault();
@@ -108,12 +62,12 @@ export default function () {
 
     const onType: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
         if (e.key === 'Enter' && e.ctrlKey) {
-            e.currentTarget.form.requestSubmit();
+            e.currentTarget.form?.requestSubmit();
         }
     };
 
     const onEdit = () => {
-        if (!userId || editing || working) {
+        if (!user || editing || working) {
             return false;
         }
 
@@ -122,7 +76,7 @@ export default function () {
     };
 
     const onBlur = () => {
-        if (editing && inputText === note) {
+        if (editing && !dirty) {
             onCancel();
         }
     };
@@ -136,19 +90,14 @@ export default function () {
 
         setSaving(true);
 
-        if (input.trim() === '') {
-            noteItem.remove();
-        } else {
-            await setNote(input.trim());
-        }
+        await record?.setNote(input.trim());
 
         setEditing(false);
         setSaving(false);
     };
 
     const inputId = useId();
-    const inputRef = useRef<HTMLTextAreaElement>();
-    const inputText = userId ? (editing ? input : noteText) : '';
+    const inputRef = useRef<HTMLTextAreaElement>(null);
 
     useLayoutEffect(() => {
         if (!inputRef.current) {
@@ -161,7 +110,7 @@ export default function () {
 
     return (
         <CacheProvider value={styleCache}>
-            <Form onSubmit={onSave} key={userId}>
+            <Form onSubmit={onSave}>
                 <Label htmlFor={inputId}>Note</Label>
 
                 <Textarea
@@ -172,23 +121,20 @@ export default function () {
                     onClick={onEdit}
                     onFocus={onEdit}
                     onBlur={onBlur}
-                    placeholder="Write a note..."
-                    className={editing ? 'editing' : ''}
+                    placeholder={loading ? 'Loading...' : 'Write a note...'}
                     readOnly={!editing}
                     disabled={working}
                     value={inputText}
                 />
 
-                {editing && inputText !== noteText && (
-                    <Actions>
-                        <Button type="submit" disabled={working}>
-                            Save
-                        </Button>
-                        <Button type="button" disabled={working} onClick={onCancel}>
-                            Cancel
-                        </Button>
-                    </Actions>
-                )}
+                <Actions className={editing && dirty ? 'show' : ''}>
+                    <Button type="submit" disabled={working}>
+                        Save
+                    </Button>
+                    <Button type="button" disabled={working} onClick={onCancel}>
+                        Cancel
+                    </Button>
+                </Actions>
             </Form>
         </CacheProvider>
     );
@@ -233,9 +179,13 @@ const Textarea = styled.textarea`
 `;
 
 const Actions = styled.div`
-    display: flex;
+    display: none;
     margin-top: 0.75rem;
     gap: 0.75rem;
+
+    &.show {
+        display: flex;
+    }
 `;
 
 const Button = styled.button`

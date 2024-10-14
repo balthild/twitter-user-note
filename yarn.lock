@@ -2096,7 +2096,7 @@
     "@types/filesystem" "*"
     "@types/har-format" "*"
 
-"@types/dom-navigation@^1.0.3":
+"@types/dom-navigation@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@types/dom-navigation/-/dom-navigation-1.0.4.tgz#a5aab514a1e40dba2b9a6cc5915d31d06bea5bcf"
   integrity sha512-s4pCS4jogEzXQsqoPZdLU+GA/5Wq+GoFsgiN2VGI8tw5I2Y/CftGJpC76iVhyoD7JTTEo+p0w+eh8SItMaxmgg==
@@ -2150,10 +2150,10 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.12.tgz#12bb1e2be27293c1406acb6af1c3f3a1481d98c6"
   integrity sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==
 
-"@types/react-dom@18.3.0":
-  version "18.3.0"
-  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.3.0.tgz#0cbc818755d87066ab6ca74fbedb2547d74a82b0"
-  integrity sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==
+"@types/react-dom@18.3.1":
+  version "18.3.1"
+  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.3.1.tgz#1e4654c08a9cdcfb6594c780ac59b55aad42fe07"
+  integrity sha512-qW1Mfv8taImTthu4KoXgDfLuk4bydU6Q/TkADnDWWHwi4NX4BR+LWfTp2sVmTqRrsHvyDDTelgelxJ+SsejKKQ==
   dependencies:
     "@types/react" "*"
 
@@ -2858,6 +2858,11 @@ detect-libc@^2.0.0, detect-libc@^2.0.1, detect-libc@^2.0.2:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.3.tgz#f0cd503b40f9939b894697d19ad50895e30cf700"
   integrity sha512-bwy0MGW55bG41VqxxypOsdSdGqLwXPI/focwgTYCFMbdUiBAxLg9CFzG08sz2aqzknwiX7Hkl0bQENjg8iLByw==
+
+dexie@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/dexie/-/dexie-4.0.8.tgz#21fca70686bdaa1d86fad45b6b19316f6a084a1d"
+  integrity sha512-1G6cJevS17KMDK847V3OHvK2zei899GwpDiqfEXHP1ASvme6eWJmAp9AU4s1son2TeGkWmC0g3y8ezOBPnalgQ==
 
 dir-glob@^3.0.1:
   version "3.0.1"

@@ -5,8 +5,8 @@ import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetShadowHostId, Plas
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEventHandler, KeyboardEventHandler } from 'react';
 
-import { useLocalRecord } from './record';
-import { useTwitterUser } from './twitter';
+import { useLocalRecord } from '../hooks/record';
+import { useTwitterUser } from '../hooks/store';
 
 const styleElement = document.createElement('style');
 
@@ -157,6 +157,7 @@ const Label = styled.label`
     top: 0.75rem;
     left: 0.75rem;
     pointer-events: none;
+    user-select: none;
 `;
 
 const Textarea = styled.textarea`

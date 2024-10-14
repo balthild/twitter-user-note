@@ -5,11 +5,10 @@
   ],
   "include": [
     ".plasmo/index.d.ts",
-    "./**/*.ts",
-    "./**/*.tsx"
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "strict": true,
     "strictNullChecks": true
   }

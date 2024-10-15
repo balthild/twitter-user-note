@@ -1,3 +1,7 @@
+chrome.action.onClicked.addListener(() => {
+    return chrome.runtime.openOptionsPage();
+});
+
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (!changeInfo.url) {
         return;

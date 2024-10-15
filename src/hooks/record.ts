@@ -2,19 +2,6 @@ import { useStorage } from '@plasmohq/storage/hook';
 import { type Draft, produce } from 'immer';
 import { useEffect } from 'react';
 
-interface LocalRecord {
-    readonly id: string;
-    readonly username: string;
-    readonly nickname: string;
-    readonly note: string;
-}
-
-interface LocalRecordItem extends LocalRecord {
-    setNote(note: string): Promise<void> | void;
-}
-
-type StoredRecord = string | Partial<LocalRecord>;
-
 function fillDefaults(user: TwitterUser, stored?: StoredRecord): Optional<LocalRecord> {
     const fill = produce((draft) => {
         draft.id ??= user.id;

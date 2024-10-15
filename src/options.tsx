@@ -1,14 +1,10 @@
 import styled from '@emotion/styled';
-import { Storage } from '@plasmohq/storage';
 import { produce } from 'immer';
 import { useEffect, useState } from 'react';
-
-const prefix = '/notes/';
-const storage = new Storage();
-storage.setNamespace(prefix);
+import { recordKeyPrefix, recordStorage } from './storage';
 
 async function getRecords() {
-    const entries = Object.entries(await storage.getAll());
+    const entries = Object.entries(await recordStorage.getAll());
 
     return entries.map(([key, value]) => {
         let record = JSON.parse(value);
@@ -25,15 +21,15 @@ async function getRecords() {
 function subscribeRecords(callback: () => void) {
     const listener = (changes: object) => {
         for (const key in changes) {
-            if (key.startsWith(prefix)) {
+            if (key.startsWith(recordKeyPrefix)) {
                 return callback();
             }
         }
     };
 
-    storage.primaryClient.onChanged.addListener(listener);
+    recordStorage.primaryClient.onChanged.addListener(listener);
 
-    return () => storage.primaryClient.onChanged.removeListener(listener);
+    return () => recordStorage.primaryClient.onChanged.removeListener(listener);
 }
 
 function useRecords(): LocalRecord[] {

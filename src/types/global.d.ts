@@ -1,5 +1,5 @@
 interface WindowEventMap {
-    'cache-twitter-user': CustomEvent<string>;
+    'cache-twitter-user': CustomEvent<{ id: string; key: string; }>;
 }
 
 type Optional<T> = T | undefined;

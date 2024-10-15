@@ -11,7 +11,7 @@ class TwitterUserStore extends CachedExternalStore<TwitterUser> {
         username.subscribe(this.update);
 
         addEventListener('cache-twitter-user', (event) => {
-            if (event.detail === username.getSnapshot()) {
+            if (event.detail.key === username.getSnapshot()) {
                 this.update();
             }
         });

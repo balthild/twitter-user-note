@@ -5,8 +5,10 @@ import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetShadowHostId, Plas
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEventHandler, KeyboardEventHandler } from 'react';
 
-import { useLocalRecord } from '../hooks/record';
+import { cache } from '../cache';
+import { fillDefaults, useLocalRecord } from '../hooks/record';
 import { useTwitterUser } from '../hooks/store';
+import { recordStorage } from '../storage';
 
 const styleElement = document.createElement('style');
 
@@ -27,6 +29,31 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = () => ({
 });
 
 export const getShadowHostId: PlasmoGetShadowHostId = () => 'twitter-user-note-shadow-host';
+
+addEventListener('cache-twitter-user', async (event) => {
+    const stored = await recordStorage.get<StoredRecord>(event.detail.id);
+    if (!stored) {
+        return;
+    }
+
+    const user = await cache.users.get(event.detail.key);
+    if (!user) {
+        return;
+    }
+
+    let record = fillDefaults(user.value, stored);
+    if (!record) {
+        return;
+    }
+
+    if (stored !== record) {
+        await recordStorage.set(event.detail.id, record);
+
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('record updated', record);
+        }
+    }
+});
 
 export default function () {
     // https://github.com/PlasmoHQ/plasmo/issues/1054

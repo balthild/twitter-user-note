@@ -84,7 +84,9 @@ export default function ListNotes() {
 
 const Container = styled.section`
     font-size: 16px;
-    margin: 2.5em 2em 3em;
+    margin: 2.5em auto 3em;
+    padding: 0 2em;
+    max-width: 1280px;
 `;
 
 const Table = styled.table`
@@ -95,12 +97,12 @@ const Table = styled.table`
 
 const HeadCell = styled.th`
     padding: 0.25em;
-    border-bottom: 2px solid;
+    border-bottom: 2px solid gray;
 `;
 
 const DataCell = styled.td`
     padding: 0.25em;
-    border-bottom: 1px solid;
+    border-bottom: 1px solid darkgray;
     line-height: 1.25;
 `;
 

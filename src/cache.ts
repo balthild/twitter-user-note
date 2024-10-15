@@ -20,7 +20,7 @@ cache.version(1).stores({
 });
 
 export function cleanup() {
-    const stale = new Date().getTime() - 86400 * 3 * 1000;
+    const stale = new Date().getTime() - 86400 * 30 * 1000;
 
     return Promise.all([
         cache.users.where('timestamp').below(stale).delete(),

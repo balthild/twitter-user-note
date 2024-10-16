@@ -1,6 +1,6 @@
 import { produce } from 'immer';
 
-import { cache } from '../cache';
+import { cache } from '../utils/cache';
 import { CachedExternalStore } from './base';
 import { username } from './username';
 

@@ -19,7 +19,7 @@ cache.version(1).stores({
     users: `key, timestamp`,
 });
 
-export function cleanup() {
+export function cleanupCache() {
     const stale = new Date().getTime() - 86400 * 30 * 1000;
 
     return Promise.all([

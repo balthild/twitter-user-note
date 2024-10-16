@@ -4,15 +4,18 @@ interface TwitterUser {
     readonly nickname: string;
 }
 
-interface LocalRecord {
-    readonly id: string;
+interface Note {
     readonly username: string;
     readonly nickname: string;
     readonly note: string;
 }
 
-interface LocalRecordItem extends LocalRecord {
-    setNote(note: string): Promise<void> | void;
+interface NoteItem extends Note {
+    setText(note: string): Promise<void> | void;
 }
 
-type StoredRecord = string | Partial<LocalRecord>;
+type NoteEntry = readonly [string, Note];
+
+type StoredNote = string | Partial<Note>;
+
+type StoredNoteEntry = readonly [string, StoredNote];

@@ -1,16 +1,14 @@
+import { isTwitterDomain } from './utils/url';
+
 chrome.action.onClicked.addListener(() => {
     return chrome.runtime.openOptionsPage();
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
-    if (!changeInfo.url) {
-        return;
-    }
+    if (!changeInfo.url) return;
 
     const url = new URL(changeInfo.url);
-    if (!isTwitterUrl(url)) {
-        return;
-    }
+    if (!isTwitterDomain(url)) return;
 
     chrome.tabs.sendMessage<ExtensionMessage>(tabId, {
         action: 'url-changed',
@@ -18,8 +16,3 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
         pathname: url.pathname,
     });
 });
-
-function isTwitterUrl(url: URL) {
-    return url.hostname === 'twitter.com'
-        || url.hostname === 'x.com';
-}

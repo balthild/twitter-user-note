@@ -1,50 +1,9 @@
 import styled from '@emotion/styled';
-import { produce } from 'immer';
-import { useEffect, useState } from 'react';
-import { recordKeyPrefix, recordStorage } from './storage';
 
-async function getRecords() {
-    const entries = Object.entries(await recordStorage.getAll());
-
-    return entries.map(([key, value]) => {
-        let record = JSON.parse(value);
-        if (typeof record === 'string') {
-            record = { note: record };
-        }
-
-        return produce(record as LocalRecord, (draft) => {
-            draft.id = key;
-        });
-    });
-}
-
-function subscribeRecords(callback: () => void) {
-    const listener = (changes: object) => {
-        for (const key in changes) {
-            if (key.startsWith(recordKeyPrefix)) {
-                return callback();
-            }
-        }
-    };
-
-    recordStorage.primaryClient.onChanged.addListener(listener);
-
-    return () => recordStorage.primaryClient.onChanged.removeListener(listener);
-}
-
-function useRecords(): LocalRecord[] {
-    const [records, setRecords] = useState<LocalRecord[]>([]);
-
-    useEffect(() => {
-        getRecords().then(setRecords);
-        return subscribeRecords(() => getRecords().then(setRecords));
-    }, []);
-
-    return records;
-}
+import { useAllNotes } from './hooks/note-all';
 
 export default function ListNotes() {
-    const records = useRecords();
+    const notes = useAllNotes();
 
     return (
         <Container>
@@ -58,18 +17,18 @@ export default function ListNotes() {
                     </tr>
                 </thead>
                 <tbody>
-                    {records.map((record) => (
-                        <tr key={record.id}>
-                            <DataCell>
-                                <CellParagraph>
-                                    {record.nickname && <RecordNickname>{record.nickname}{' '}</RecordNickname>}
-                                    {record.username && <RecordUsername>@{record.username}</RecordUsername>}
-                                </CellParagraph>
-                                <RecordId>{record.id}</RecordId>
-                            </DataCell>
-                            <DataCell>
-                                <CellParagraph>{record.note}</CellParagraph>
-                            </DataCell>
+                    {notes.map(([id, note]) => (
+                        <tr key={id}>
+                            <ItemCell>
+                                <Paragraph>
+                                    {note.nickname && <NoteNickname>{note.nickname}{' '}</NoteNickname>}
+                                    {note.username && <NoteUsername>@{note.username}</NoteUsername>}
+                                </Paragraph>
+                                <NoteId>{id}</NoteId>
+                            </ItemCell>
+                            <ItemCell>
+                                <Paragraph>{note.note}</Paragraph>
+                            </ItemCell>
                         </tr>
                     ))}
                 </tbody>
@@ -96,13 +55,13 @@ const HeadCell = styled.th`
     border-bottom: 2px solid gray;
 `;
 
-const DataCell = styled.td`
+const ItemCell = styled.td`
     padding: 0.25em;
     border-bottom: 1px solid darkgray;
     line-height: 1.25;
 `;
 
-const CellParagraph = styled.p`
+const Paragraph = styled.p`
     margin: 0.25em 0;
 
     &:empty {
@@ -110,16 +69,16 @@ const CellParagraph = styled.p`
     }
 `;
 
-const RecordId = styled(CellParagraph)`
+const NoteId = styled(Paragraph)`
     font-size: 0.9em;
     color: gray;
 `;
 
-const RecordNickname = styled.span`
+const NoteNickname = styled.span`
     font-weight: bolder;
     margin-right: 0.25em;
 `;
 
-const RecordUsername = styled.span`
+const NoteUsername = styled.span`
     color: gray;
 `;

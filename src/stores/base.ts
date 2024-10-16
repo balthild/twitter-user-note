@@ -1,3 +1,5 @@
+import { isDev } from '../utils/env';
+
 type Listener = () => void;
 
 // Level = READ UNCOMMITTED
@@ -63,7 +65,7 @@ export abstract class CachedExternalStore<T> {
             listener();
         }
 
-        if (process.env.NODE_ENV !== 'production') {
+        if (isDev()) {
             console.log(this.constructor.name, this.current);
         }
     }

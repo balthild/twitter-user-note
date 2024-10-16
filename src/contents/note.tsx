@@ -5,10 +5,11 @@ import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetShadowHostId, Plas
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEventHandler, KeyboardEventHandler } from 'react';
 
-import { cache } from '../cache';
-import { fillDefaults, useLocalRecord } from '../hooks/record';
+import { normalizeNote, useNote } from '../hooks/note-item';
 import { useTwitterUser } from '../hooks/store';
-import { recordStorage } from '../storage';
+import { cache } from '../utils/cache';
+import { isDev } from '../utils/env';
+import { noteStorage } from '../utils/storage';
 
 const styleElement = document.createElement('style');
 
@@ -31,26 +32,20 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = () => ({
 export const getShadowHostId: PlasmoGetShadowHostId = () => 'twitter-user-note-shadow-host';
 
 addEventListener('cache-twitter-user', async (event) => {
-    const stored = await recordStorage.get<StoredRecord>(event.detail.id);
-    if (!stored) {
-        return;
-    }
-
     const user = await cache.users.get(event.detail.key);
-    if (!user) {
-        return;
-    }
+    if (!user) return;
 
-    let record = fillDefaults(user.value, stored);
-    if (!record) {
-        return;
-    }
+    const stored = await noteStorage.get<StoredNote>(event.detail.id);
+    if (!stored) return;
 
-    if (stored !== record) {
-        await recordStorage.set(event.detail.id, record);
+    let note = normalizeNote(user.value, stored);
+    if (!note) return;
 
-        if (process.env.NODE_ENV !== 'production') {
-            console.log('record updated', record);
+    if (stored !== note) {
+        await noteStorage.set(event.detail.id, note);
+
+        if (isDev()) {
+            console.log('Note user info updated:', note);
         }
     }
 });
@@ -64,16 +59,18 @@ export default function () {
     }, []);
 
     const user = useTwitterUser();
-    const record = useLocalRecord(user);
+    const note = useNote(user);
+
+    console.log('render', user, note);
 
     const [input, setInput] = useState('');
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    const loading = !user || !record;
+    const loading = !user || !note;
     const working = loading || saving;
 
-    const noteText = record?.note ?? '';
+    const noteText = note?.note ?? '';
     const inputText = user ? (editing ? input : noteText) : '';
     const dirty = inputText !== noteText;
 
@@ -117,7 +114,7 @@ export default function () {
 
         setSaving(true);
 
-        await record?.setNote(input.trim());
+        await note?.setText(input.trim());
 
         setEditing(false);
         setSaving(false);
@@ -127,9 +124,7 @@ export default function () {
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
     useLayoutEffect(() => {
-        if (!inputRef.current) {
-            return;
-        }
+        if (!inputRef.current) return;
 
         inputRef.current.style.height = 'unset';
         inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
@@ -217,8 +212,7 @@ const Actions = styled.div`
 `;
 
 const Button = styled.button`
-    padding: 0 1.5em;
-    line-height: 2.25em;
+    padding: 0.5em 1.5em;
     font-size: inherit;
     font-family: inherit;
     border: none;

@@ -7,14 +7,14 @@ export function useAllNotes() {
     const [notes, setNotes] = useState([] as NoteEntry[]);
 
     useEffect(() => {
-        getAllNotes().then(setNotes);
-        return subscribeAllNotes(() => getAllNotes().then(setNotes));
+        fetchAllNotes().then(setNotes);
+        return subscribeAllNotes(() => fetchAllNotes().then(setNotes));
     }, []);
 
     return notes;
 }
 
-async function getAllNotes() {
+async function fetchAllNotes() {
     const entries = [];
 
     const record = await noteStorage.getAll();

@@ -4,4 +4,8 @@ interface UrlChangedMessage {
     pathname: string;
 }
 
-type ExtensionMessage = UrlChangedMessage | Record<string, any>;
+interface UnknownMessage {
+    action: never;
+}
+
+type ExtensionMessage = UrlChangedMessage | UnknownMessage;

@@ -1,4 +1,3 @@
-import { useStorage } from '@plasmohq/storage/hook';
 import { type Draft, produce } from 'immer';
 import { useEffect, useState } from 'react';
 
@@ -7,13 +6,12 @@ import { noteStorage } from '../utils/storage';
 export function useNote(user?: TwitterUser): Optional<NoteItem> {
     // undefined: loading
     // [k, v] if k === id: loaded
-    // [k, v] if k !== id: invalidated, loading next
+    // [k, v] if k !== id: key invalidated, loading next
     const [stored, setStored] = useState<StoredNoteEntry>();
 
     useEffect(() => {
         if (!user?.id) return;
-        setStored(undefined);
-        getNote(user.id).then(setStored);
+        fetchNote(user.id).then(setStored);
         return subscribeNote(user.id, setStored);
     }, [user?.id]);
 
@@ -24,7 +22,7 @@ export function useNote(user?: TwitterUser): Optional<NoteItem> {
     return toNoteItem(user, stored[1]);
 }
 
-async function getNote(id: string) {
+async function fetchNote(id: string) {
     const stored = await noteStorage.get<StoredNote>(id);
     return [id, stored] as StoredNoteEntry;
 }

@@ -2,7 +2,7 @@ import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import styled from '@emotion/styled';
 import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetShadowHostId, PlasmoGetStyle } from 'plasmo';
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEventHandler, KeyboardEventHandler } from 'react';
 
 import { normalizeNote, useNote } from '../hooks/note-item';
@@ -61,11 +61,16 @@ export default function () {
     const user = useTwitterUser();
     const note = useNote(user);
 
-    console.log('render', user, note);
-
     const [input, setInput] = useState('');
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
+
+    const [renderedUserId, setRenderedUserId] = useState(user?.id);
+    if (user?.id !== renderedUserId) {
+        setRenderedUserId(user?.id);
+        setEditing(false);
+        setSaving(false);
+    }
 
     const loading = !user || !note;
     const working = loading || saving;
@@ -73,11 +78,6 @@ export default function () {
     const noteText = note?.note ?? '';
     const inputText = user ? (editing ? input : noteText) : '';
     const dirty = inputText !== noteText;
-
-    useEffect(() => {
-        setEditing(false);
-        setSaving(false);
-    }, [user?.id]);
 
     const onInput: FormEventHandler<HTMLTextAreaElement> = (e) => {
         e.preventDefault();

@@ -20,7 +20,7 @@ class TwitterUsernameStore extends CachedExternalStore<string> {
                 this.update(location.pathname);
             });
         } else {
-            chrome.runtime.onMessage.addListener((message) => {
+            chrome.runtime.onMessage.addListener((message: ExtensionMessage) => {
                 if (message && message.action === 'url-changed') {
                     this.update(message.pathname);
                 }

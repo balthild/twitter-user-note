@@ -2,16 +2,15 @@ import { produce } from 'immer';
 
 import { cache } from '../utils/cache';
 import { CachedExternalStore } from './base';
-import { username } from './username';
 
-class TwitterUserStore extends CachedExternalStore<TwitterUser> {
-    public constructor() {
+export class TwitterUserStore extends CachedExternalStore<TwitterUser> {
+    public constructor(private key: CachedExternalStore<string>) {
         super();
 
-        username.subscribe(this.update);
+        key.subscribe(this.update);
 
         addEventListener('cache-twitter-user', (event) => {
-            if (event.detail.key === username.getSnapshot()) {
+            if (event.detail.key === this.key.getSnapshot()) {
                 this.update();
             }
         });
@@ -22,7 +21,7 @@ class TwitterUserStore extends CachedExternalStore<TwitterUser> {
     private update = async () => {
         const tx = this.transaction();
 
-        const key = username.getSnapshot();
+        const key = this.key.getSnapshot();
         if (!key) {
             return tx.remove().commit();
         }
@@ -42,5 +41,3 @@ class TwitterUserStore extends CachedExternalStore<TwitterUser> {
         return tx.put(value).commit();
     };
 }
-
-export const user = new TwitterUserStore();

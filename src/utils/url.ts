@@ -3,17 +3,45 @@ export function isTwitterDomain(url: URL) {
         || url.hostname === 'x.com';
 }
 
-export function isUserAPI(url: URL) {
+export function isTwitterGraphQL(url: URL) {
     if (!isTwitterDomain(url)) {
         return false;
     }
 
-    if (!url.pathname.startsWith('/i/api/graphql/')) {
+    return url.pathname.startsWith('/i/api/graphql/');
+}
+
+export function isUserAPI(url: URL) {
+    if (!isTwitterGraphQL(url)) {
         return false;
     }
 
     return url.pathname.endsWith('/UserByScreenName')
         || url.pathname.endsWith('/UserByRestId');
+}
+
+export function isHomeTimelineAPI(url: URL) {
+    if (!isTwitterGraphQL(url)) {
+        return false;
+    }
+
+    return url.pathname.endsWith('/HomeTimeline');
+}
+
+export function isCommunityTimelineAPI(url: URL) {
+    if (!isTwitterGraphQL(url)) {
+        return false;
+    }
+
+    return url.pathname.endsWith('/CommunityTweetsTimeline');
+}
+
+export function isUserTweetsAPI(url: URL) {
+    if (!isTwitterGraphQL(url)) {
+        return false;
+    }
+
+    return url.pathname.endsWith('/UserTweets');
 }
 
 export function isNotificationsAPI(url: URL) {
@@ -38,4 +66,29 @@ export function isFollowingAPI(url: URL) {
     }
 
     return url.pathname === '/i/api/1.1/friends/following/list.json';
+}
+
+const NON_USERNAMES = new Set([
+    'i',
+    'home',
+    'explore',
+    'notifications',
+    'messages',
+    'jobs',
+    'settings',
+    'account',
+]);
+
+export function getTwitterUsernameLowercase(pathname: string) {
+    const segments = pathname.split('/').slice(1);
+    if (segments.length === 0) {
+        return;
+    }
+
+    const name = segments[0].toLowerCase();
+    if (NON_USERNAMES.has(name)) {
+        return;
+    }
+
+    return name;
 }

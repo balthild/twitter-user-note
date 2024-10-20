@@ -1,6 +1,8 @@
 import Dexie from 'dexie';
 import type { EntityTable } from 'dexie';
 
+import { devLog } from './misc';
+
 interface CacheEntity<T> {
     key: string;
     timestamp: number;
@@ -19,10 +21,14 @@ cache.version(1).stores({
     users: `key, timestamp`,
 });
 
-export function cleanupCache() {
+export async function cleanupCache() {
     const stale = new Date().getTime() - 86400 * 30 * 1000;
 
-    return Promise.all([
+    const rows = await Promise.all([
         cache.users.where('timestamp').below(stale).delete(),
     ]);
+
+    const total = rows.reduce((a, b) => a + b, 0);
+
+    devLog(`Removed ${total} Stale Cache`);
 }

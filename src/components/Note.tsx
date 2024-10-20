@@ -1,64 +1,16 @@
-import createCache from '@emotion/cache';
-import { CacheProvider } from '@emotion/react';
 import styled from '@emotion/styled';
-import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetShadowHostId, PlasmoGetStyle } from 'plasmo';
 import { useId, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEventHandler, KeyboardEventHandler } from 'react';
 
-import { normalizeNote, useNote } from '../hooks/note-item';
-import { useTwitterUser } from '../hooks/store';
-import { cache } from '../utils/cache';
-import { isDev } from '../utils/env';
-import { noteStorage } from '../utils/storage';
+import { useNote } from '../hooks/note-item';
 
-const styleElement = document.createElement('style');
+export interface NoteProps {
+    user: Optional<TwitterUser>;
+    readonly: boolean;
+}
 
-const styleCache = createCache({
-    key: 'twitter-user-note-emotion-cache',
-    container: styleElement,
-});
-
-export const getStyle: PlasmoGetStyle = () => styleElement;
-
-export const config: PlasmoCSConfig = {
-    matches: ['https://twitter.com/*', 'https://x.com/*'],
-};
-
-export const getInlineAnchor: PlasmoGetInlineAnchor = () => ({
-    element: document.querySelector('[data-testid="UserName"]')!,
-    insertPosition: 'afterend',
-});
-
-export const getShadowHostId: PlasmoGetShadowHostId = () => 'twitter-user-note-shadow-host';
-
-addEventListener('cache-twitter-user', async (event) => {
-    const user = await cache.users.get(event.detail.key);
-    if (!user) return;
-
-    const stored = await noteStorage.get<StoredNote>(event.detail.id);
-    if (!stored) return;
-
-    let note = normalizeNote(user.value, stored);
-    if (!note) return;
-
-    if (stored !== note) {
-        await noteStorage.set(event.detail.id, note);
-
-        if (isDev()) {
-            console.log('Note user info updated:', note);
-        }
-    }
-});
-
-export default function () {
-    // https://github.com/PlasmoHQ/plasmo/issues/1054
-    useLayoutEffect(() => {
-        return () => {
-            styleCache.inserted = {};
-        };
-    }, []);
-
-    const user = useTwitterUser();
+export function Note(props: NoteProps) {
+    const user = props.user;
     const note = useNote(user);
 
     const [input, setInput] = useState('');
@@ -91,7 +43,7 @@ export default function () {
     };
 
     const onEdit = () => {
-        if (!user || editing || working) {
+        if (!user || editing || working || props.readonly) {
             return false;
         }
 
@@ -131,40 +83,38 @@ export default function () {
     }, [inputText]);
 
     return (
-        <CacheProvider value={styleCache}>
-            <Form onSubmit={onSave}>
-                <Label htmlFor={inputId}>Note</Label>
+        <Form onSubmit={onSave}>
+            <Label htmlFor={inputId}>Note</Label>
 
-                <Textarea
-                    id={inputId}
-                    ref={inputRef}
-                    onInput={onInput}
-                    onKeyDown={onType}
-                    onClick={onEdit}
-                    onFocus={onEdit}
-                    onBlur={onBlur}
-                    placeholder={loading ? 'Loading...' : 'Write a note...'}
-                    readOnly={!editing}
-                    disabled={working}
-                    value={inputText}
-                />
+            <Textarea
+                id={inputId}
+                ref={inputRef}
+                onInput={onInput}
+                onKeyDown={onType}
+                onClick={onEdit}
+                onFocus={onEdit}
+                onBlur={onBlur}
+                className={props.readonly ? 'readonly' : 'editable'}
+                placeholder={loading ? 'Loading...' : 'Write a note...'}
+                readOnly={!editing}
+                disabled={working}
+                value={inputText}
+            />
 
-                <Actions className={editing && dirty ? 'show' : ''}>
-                    <Button type="submit" disabled={working}>
-                        Save
-                    </Button>
-                    <Button type="button" disabled={working} onClick={onCancel}>
-                        Cancel
-                    </Button>
-                </Actions>
-            </Form>
-        </CacheProvider>
+            <Actions className={editing && dirty ? 'show' : ''}>
+                <Button type="submit" disabled={working}>
+                    Save
+                </Button>
+                <Button type="button" disabled={working} onClick={onCancel}>
+                    Cancel
+                </Button>
+            </Actions>
+        </Form>
     );
 }
 
 const Form = styled.form`
     width: 100%;
-    margin-bottom: 1.25rem;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -193,11 +143,18 @@ const Textarea = styled.textarea`
     border-radius: 0.25rem;
     font-size: inherit;
     font-family: inherit;
-    outline-color: #1d9bf0;
     background: light-dark(#eff1f5, rgb(255 255 255 / 10%));
 
-    &:focus {
-        background: transparent;
+    &.readonly {
+        outline: none;
+    }
+
+    &.editable {
+        outline-color: #1d9bf0;
+
+        &:focus {
+            background: transparent;
+        }
     }
 `;
 

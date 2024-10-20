@@ -27,7 +27,7 @@ export default function ListNotes() {
                                 <NoteId>{id}</NoteId>
                             </ItemCell>
                             <ItemCell>
-                                <Paragraph>{note.note}</Paragraph>
+                                <NoteText>{note.note}</NoteText>
                             </ItemCell>
                         </tr>
                     ))}
@@ -72,6 +72,10 @@ const Paragraph = styled.p`
 const NoteId = styled(Paragraph)`
     font-size: 0.9em;
     color: gray;
+`;
+
+const NoteText = styled(Paragraph)`
+    white-space: pre-wrap;
 `;
 
 const NoteNickname = styled.span`

@@ -1,9 +1,5 @@
 type Optional<T> = T | undefined;
 
-declare class Nominal<T extends string> {
-    #__brand: T;
-}
-
 type ExcludeComplementaryFields<T, U> = {
     [K in Exclude<keyof U, keyof T>]?: never;
 };
@@ -11,6 +7,8 @@ type ExcludeComplementaryFields<T, U> = {
 type Discriminated<T, U> =
     | (T & ExcludeComplementaryFields<T, U>)
     | (U & ExcludeComplementaryFields<U, T>);
+
+type ValueOf<T> = T[keyof T];
 
 type KeyOfObject<T extends object> = keyof T extends never ? string : keyof T;
 

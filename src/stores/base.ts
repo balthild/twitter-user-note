@@ -1,6 +1,53 @@
-import { isDev } from '../utils/env';
+import { devLog } from '../utils/misc';
 
 type Listener = () => void;
+
+export abstract class CachedExternalStore<T> {
+    private listeners: Listener[] = [];
+
+    private current: Optional<T>;
+
+    private tx!: Transaction<T>;
+
+    public subscribe = (callback: Listener) => {
+        if (!this.listeners.includes(callback)) {
+            this.listeners.push(callback);
+        }
+
+        return () => this.unsubscribe(callback);
+    };
+
+    public unsubscribe = (callback: Listener) => {
+        const index = this.listeners.indexOf(callback);
+        if (index != -1) {
+            this.listeners.splice(index, 1);
+        }
+    };
+
+    public getSnapshot = (): Optional<T> => {
+        return this.current;
+    };
+
+    protected transaction() {
+        this.tx?.abort();
+
+        return this.tx = new Transaction(
+            this.current,
+            (value: Optional<T>) => {
+                this.current = value;
+                this.emit();
+            },
+        );
+    }
+
+    private emit() {
+        for (const listener of this.listeners) {
+            listener();
+        }
+
+        devLog(this.constructor.name, this.current);
+    }
+}
 
 // Level = READ UNCOMMITTED
 class Transaction<T> {
@@ -34,58 +81,7 @@ class Transaction<T> {
     };
 
     public abort = () => {
-        if (this.active) {
-            this.set(this.backup);
-            this.active = false;
-        }
-    };
-}
-
-export abstract class CachedExternalStore<T> {
-    private listeners: Listener[] = [];
-
-    private current: Optional<T>;
-
-    private tx!: Transaction<T>;
-
-    protected transaction() {
-        this.tx?.abort();
-
-        return this.tx = new Transaction(
-            this.current,
-            (value: Optional<T>) => {
-                this.current = value;
-                this.emit();
-            },
-        );
-    }
-
-    private emit() {
-        for (const listener of this.listeners) {
-            listener();
-        }
-
-        if (isDev()) {
-            console.log(this.constructor.name, this.current);
-        }
-    }
-
-    public subscribe = (callback: Listener) => {
-        if (!this.listeners.includes(callback)) {
-            this.listeners.push(callback);
-        }
-
-        return () => this.unsubscribe(callback);
-    };
-
-    public unsubscribe = (callback: Listener) => {
-        const index = this.listeners.indexOf(callback);
-        if (index != -1) {
-            this.listeners.splice(index, 1);
-        }
-    };
-
-    public getSnapshot = (): Optional<T> => {
-        return this.current;
+        this.put(this.backup);
+        this.active = false;
     };
 }

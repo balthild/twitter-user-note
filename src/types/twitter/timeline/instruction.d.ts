@@ -6,6 +6,7 @@ namespace TwitterAPI.Timeline {
         ClearCache: InstructionTypes.ClearCache;
         PinEntry: InstructionTypes.PinEntry;
         AddEntries: InstructionTypes.AddEntries;
+        Terminate: InstructionTypes.Terminate;
     }
 
     namespace InstructionTypes {
@@ -25,6 +26,10 @@ namespace TwitterAPI.Timeline {
         interface AddEntries extends Base {
             type: 'TimelineAddEntries';
             entries: Entry[];
+        }
+
+        interface Terminate extends Base {
+            type: 'TimelineTerminateTimeline';
         }
     }
 }

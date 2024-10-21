@@ -1,4 +1,4 @@
-import { getTwitterUsernameLowercase } from '../utils/url';
+import { TwitterURL } from '../utils/twitter';
 import { CachedExternalStore as Store } from './base';
 import { TwitterUserStore } from './user';
 
@@ -20,7 +20,7 @@ export class CardUsernameStore extends Store<string> {
         const links = this.card.querySelectorAll('a');
         for (const link of links ?? []) {
             const url = new URL(link.href);
-            const name = getTwitterUsernameLowercase(url.pathname);
+            const name = TwitterURL.getUsernameLowercase(url.pathname);
             if (name) {
                 return tx.put(name).commit();
             }

@@ -2,15 +2,7 @@ import type { PlasmoCSConfig } from 'plasmo';
 
 import { cache } from '../../utils/cache';
 import { devLog, isDev, noop } from '../../utils/misc';
-import {
-    isCommunityTimelineAPI,
-    isFollowingAPI,
-    isHomeTimelineAPI,
-    isNotificationsAPI,
-    isRecommandationsAPI,
-    isUserAPI,
-    isUserTweetsAPI,
-} from '../../utils/url';
+import { TwitterURL } from '../../utils/twitter';
 
 export const config: PlasmoCSConfig = {
     matches: ['https://twitter.com/*', 'https://x.com/*'],
@@ -64,35 +56,42 @@ function interceptXHR() {
 }
 
 async function interceptResponse(url: URL, response: <T>() => Promise<T>) {
-    if (isUserAPI(url)) {
+    if (TwitterURL.API.isUser(url)) {
         const json = await response<TwitterAPI.Response.User>();
         const user = json.data.user.result;
         cacheTwitterUser(user);
         return;
     }
 
-    if (isHomeTimelineAPI(url)) {
+    if (TwitterURL.API.isHomeTimeline(url)) {
         const json = await response<TwitterAPI.Response.HomeTimeline>();
         const timeline = json.data.home.home_timeline_urt;
         processTimeline(timeline, cacheTwitterUser);
         return;
     }
 
-    if (isCommunityTimelineAPI(url)) {
+    if (TwitterURL.API.isCommunityTimeline(url)) {
         const json = await response<TwitterAPI.Response.CommunityTimeline>();
         const timeline = json.data.communityResults.result.ranked_community_timeline.timeline;
         processTimeline(timeline, cacheTwitterUser);
         return;
     }
 
-    if (isUserTweetsAPI(url)) {
+    if (TwitterURL.API.isUserTweets(url)) {
         const json = await response<TwitterAPI.Response.UserTweets>();
         const timeline = json.data.user.result.timeline_v2.timeline;
         processTimeline(timeline, cacheTwitterUser);
         return;
     }
 
-    if (isNotificationsAPI(url)) {
+    if (TwitterURL.API.isTweetDetail(url)) {
+        const json = await response<TwitterAPI.Response.TweetDetail>();
+        const timeline = json.data.threaded_conversation_with_injections_v2;
+        processTimeline(timeline, cacheTwitterUser);
+        return;
+    }
+
+    if (TwitterURL.API.isNotifications(url)) {
         const json = await response<TwitterAPI.REST.Response.Notifications>();
         const users = json.globalObjects.users ?? {};
         for (const user of Object.values(users)) {
@@ -101,7 +100,7 @@ async function interceptResponse(url: URL, response: <T>() => Promise<T>) {
         return;
     }
 
-    if (isRecommandationsAPI(url)) {
+    if (TwitterURL.API.isRecommandations(url)) {
         const json = await response<TwitterAPI.REST.Response.Recommendations>();
         for (const item of json) {
             cacheTwitterUser(item.user);
@@ -109,7 +108,7 @@ async function interceptResponse(url: URL, response: <T>() => Promise<T>) {
         return;
     }
 
-    if (isFollowingAPI(url)) {
+    if (TwitterURL.API.isFollowing(url)) {
         const json = await response<TwitterAPI.REST.Response.Following>();
         for (const user of json.users) {
             cacheTwitterUser(user);

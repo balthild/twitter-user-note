@@ -38,4 +38,10 @@ namespace TwitterAPI.Response {
             };
         };
     }
+
+    interface TweetDetail {
+        data: {
+            threaded_conversation_with_injections_v2: TwitterAPI.Timeline;
+        };
+    }
 }

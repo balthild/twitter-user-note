@@ -1,23 +1,22 @@
-namespace TwitterAPI.Timeline {
+declare namespace TwitterAPI.Timeline {
     type Item = ValueOf<ItemTypes>;
 
     type ItemContent = ValueOf<ItemContentTypes>;
 
-    type ItemTypes = TwitterAPI.ItemTypeMap<ItemContentTypes>;
+    type ItemTypes = ApplyMap<ItemContentTypes, 'TwitterAPI.Item'>;
 
-    interface ItemContentTypes {
-        Base: ItemContentTypes.Base;
-        Tweet: ItemContentTypes.Tweet;
-    }
+    type ItemContentTypes = DiscriminatedMap<{
+        Unknown: {};
 
-    namespace ItemContentTypes {
-        interface Base extends TwitterAPI.ItemContent {}
-
-        interface Tweet extends Base {
+        Tweet: {
             itemType: 'TimelineTweet';
-            tweet_results: {
-                result: TwitterAPI.Tweet;
-            };
-        }
-    }
+            tweet_results: Result<TwitterAPI.Tweet>;
+        };
+
+        User: {
+            itemType: 'TimelineUser';
+            userDisplayType: string;
+            user_results: Result<TwitterAPI.User>;
+        };
+    }>;
 }

@@ -1,41 +1,38 @@
-namespace TwitterAPI.Timeline {
+declare namespace TwitterAPI.Timeline {
     type Entry = ValueOf<EntryTypes>;
 
     type EntryContent = ValueOf<EntryContentTypes>;
 
-    type EntryTypes = TwitterAPI.EntryTypeMap<EntryContentTypes>;
+    type EntryTypes = ApplyMap<EntryContentTypes, 'TwitterAPI.Entry'>;
 
-    interface EntryContentTypes {
-        Base: EntryContentTypes.Base;
-        Cursor: EntryContentTypes.Cursor;
-        Tweet: EntryContentTypes.Tweet;
-        Module: EntryContentTypes.Module;
-        HomeConversation: EntryContentTypes.HomeConversation;
-    }
+    type EntryContentTypes = DiscriminatedMap<{
+        Unknown: {};
 
-    namespace EntryContentTypes {
-        interface Base extends TwitterAPI.EntryContent {
-            displayType: never;
-        }
-
-        interface Cursor extends Base {
+        Cursor: {
             entryType: 'TimelineTimelineCursor';
-        }
+        };
 
-        interface Tweet extends Base {
+        Item: Item & {
             entryType: 'TimelineTimelineItem';
-            itemContent: ItemContentTypes['Tweet'];
-        }
+        };
 
-        interface Module extends Base {
+        Tweet: ItemTypes['Tweet'] & {
+            entryType: 'TimelineTimelineItem';
+        };
+
+        User: ItemTypes['User'] & {
+            entryType: 'TimelineTimelineItem';
+        };
+
+        Module: {
             entryType: 'TimelineTimelineModule';
             items: { item: Item; }[];
-        }
+        };
 
-        interface HomeConversation extends Base {
+        HomeConversation: {
             entryType: 'TimelineTimelineModule';
             displayType: 'VerticalConversation';
             items: { item: ItemTypes['Tweet']; }[];
-        }
-    }
+        };
+    }>;
 }

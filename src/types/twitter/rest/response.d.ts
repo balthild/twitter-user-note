@@ -1,4 +1,4 @@
-namespace TwitterAPI.REST.Response {
+declare namespace TwitterAPI.REST.Response {
     interface Following {
         users: TwitterAPI.REST.User[];
     }
@@ -10,4 +10,8 @@ namespace TwitterAPI.REST.Response {
     }
 
     type Recommendations = TwitterAPI.REST.Recommendation[];
+
+    interface UserUpdates {
+        users?: Record<string, TwitterAPI.REST.User>;
+    }
 }

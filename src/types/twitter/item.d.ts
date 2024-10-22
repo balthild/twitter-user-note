@@ -1,13 +1,13 @@
-namespace TwitterAPI {
+declare namespace TwitterAPI {
     interface Item<T = ItemContent> {
         itemContent: T;
     }
 
     interface ItemContent {
-        itemType: never;
+        itemType: string;
     }
+}
 
-    type ItemTypeMap<Map> = {
-        [Name in keyof Map]: Item<Map[Name]>;
-    };
+interface HKT<T> {
+    'TwitterAPI.Item': TwitterAPI.Item<T>;
 }

@@ -63,6 +63,22 @@ async function interceptResponse(url: URL, response: <T>() => Promise<T>) {
         return;
     }
 
+    if (TwitterURL.API.isUsersByRestIds(url)) {
+        const json = await response<TwitterAPI.Response.UsersByRestIds>();
+        const users = json.data.users;
+        for (const user of users) {
+            cacheTwitterUser(user.result);
+        }
+        return;
+    }
+
+    if (TwitterURL.API.isFollowing(url)) {
+        const json = await response<TwitterAPI.Response.Following>();
+        const timeline = json.data.user.result.timeline.timeline;
+        processTimeline(timeline, cacheTwitterUser);
+        return;
+    }
+
     if (TwitterURL.API.isHomeTimeline(url)) {
         const json = await response<TwitterAPI.Response.HomeTimeline>();
         const timeline = json.data.home.home_timeline_urt;
@@ -84,6 +100,20 @@ async function interceptResponse(url: URL, response: <T>() => Promise<T>) {
         return;
     }
 
+    if (TwitterURL.API.isPinnedTimelines(url)) {
+        const json = await response<TwitterAPI.Response.PinnedTimelines>();
+        const timelines = json.data.pinned_timelines.pinned_timelines;
+        for (const timeline of timelines) {
+            const community = timeline.community_results.result;
+            cacheTwitterUser(community.creator_results.result);
+            cacheTwitterUser(community.admin_results.result);
+            for (const user of community.members_facepile_results) {
+                cacheTwitterUser(user.result);
+            }
+        }
+        return;
+    }
+
     if (TwitterURL.API.isTweetDetail(url)) {
         const json = await response<TwitterAPI.Response.TweetDetail>();
         const timeline = json.data.threaded_conversation_with_injections_v2;
@@ -91,7 +121,7 @@ async function interceptResponse(url: URL, response: <T>() => Promise<T>) {
         return;
     }
 
-    if (TwitterURL.API.isNotifications(url)) {
+    if (TwitterURL.API.REST.isNotifications(url)) {
         const json = await response<TwitterAPI.REST.Response.Notifications>();
         const users = json.globalObjects.users ?? {};
         for (const user of Object.values(users)) {
@@ -100,7 +130,7 @@ async function interceptResponse(url: URL, response: <T>() => Promise<T>) {
         return;
     }
 
-    if (TwitterURL.API.isRecommandations(url)) {
+    if (TwitterURL.API.REST.isRecommandations(url)) {
         const json = await response<TwitterAPI.REST.Response.Recommendations>();
         for (const item of json) {
             cacheTwitterUser(item.user);
@@ -108,9 +138,19 @@ async function interceptResponse(url: URL, response: <T>() => Promise<T>) {
         return;
     }
 
-    if (TwitterURL.API.isFollowing(url)) {
+    if (TwitterURL.API.REST.isFollowing(url)) {
         const json = await response<TwitterAPI.REST.Response.Following>();
-        for (const user of json.users) {
+        const users = json.users;
+        for (const user of users) {
+            cacheTwitterUser(user);
+        }
+        return;
+    }
+
+    if (TwitterURL.API.REST.isUserUpdates(url)) {
+        const json = await response<TwitterAPI.REST.Response.UserUpdates>();
+        const users = json.users ?? {};
+        for (const user of Object.values(users)) {
             cacheTwitterUser(user);
         }
         return;
@@ -129,7 +169,7 @@ type WalkUserCallback = (user: TwitterAPI.User) => void;
 function processTimeline(timeline: TwitterAPI.Timeline, callback: WalkUserCallback) {
     for (const instruction of timeline.instructions) {
         if (instruction.type === 'TimelinePinEntry') {
-            processTweet(instruction.entry.content, callback);
+            processItem(instruction.entry.content, callback);
             continue;
         }
 
@@ -144,23 +184,32 @@ function processTimeline(timeline: TwitterAPI.Timeline, callback: WalkUserCallba
             const { entryType, displayType } = entry.content;
 
             if (entryType === 'TimelineTimelineItem') {
-                processTweet(entry.content, callback);
+                processItem(entry.content, callback);
                 continue;
             }
 
             if (entryType === 'TimelineTimelineModule' && displayType === 'VerticalConversation') {
                 for (const item of entry.content.items) {
-                    processTweet(item.item, callback);
+                    processItem(item.item, callback);
                 }
                 continue;
             }
         }
     }
 
-    function processTweet(item: TwitterAPI.Timeline.ItemTypes['Tweet'], callback: WalkUserCallback) {
-        const tweet = item.itemContent.tweet_results.result;
-        const user = tweet.core.user_results.result;
-        callback(user);
+    function processItem(item: TwitterAPI.Timeline.Item, callback: WalkUserCallback) {
+        if (item.itemContent.itemType === 'TimelineTweet') {
+            const tweet = item.itemContent.tweet_results.result;
+            const user = tweet.core.user_results.result;
+            callback(user);
+            return;
+        }
+
+        if (item.itemContent.itemType === 'TimelineUser') {
+            const user = item.itemContent.user_results.result;
+            callback(user);
+            return;
+        }
     }
 }
 

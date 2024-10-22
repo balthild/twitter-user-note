@@ -1,9 +1,13 @@
-namespace TwitterAPI.Response {
+declare namespace TwitterAPI.Response {
     interface User {
         data: {
-            user: {
-                result: TwitterAPI.User;
-            };
+            user: Result<TwitterAPI.User>;
+        };
+    }
+
+    interface UsersByRestIds {
+        data: {
+            users: Result<TwitterAPI.User>[];
         };
     }
 
@@ -35,6 +39,28 @@ namespace TwitterAPI.Response {
                         timeline: TwitterAPI.Timeline;
                     };
                 };
+            };
+        };
+    }
+
+    interface Following {
+        data: {
+            user: {
+                result: {
+                    timeline: {
+                        timeline: {
+                            instructions: TwitterAPI.Timeline.Instruction[];
+                        };
+                    };
+                };
+            };
+        };
+    }
+
+    interface PinnedTimelines {
+        data: {
+            pinned_timelines: {
+                pinned_timelines: TwitterAPI.CommunityPinnedTimeline[];
             };
         };
     }

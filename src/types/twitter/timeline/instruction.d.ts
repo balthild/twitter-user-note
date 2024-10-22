@@ -1,35 +1,25 @@
-namespace TwitterAPI.Timeline {
+declare namespace TwitterAPI.Timeline {
     type Instruction = ValueOf<InstructionTypes>;
 
-    interface InstructionTypes {
-        Base: InstructionTypes.Base;
-        ClearCache: InstructionTypes.ClearCache;
-        PinEntry: InstructionTypes.PinEntry;
-        AddEntries: InstructionTypes.AddEntries;
-        Terminate: InstructionTypes.Terminate;
-    }
+    type InstructionTypes = DiscriminatedMap<{
+        Unknown: {};
 
-    namespace InstructionTypes {
-        interface Base {
-            type: never;
-        }
-
-        interface ClearCache extends Base {
+        ClearCache: {
             type: 'TimelineClearCache';
-        }
+        };
 
-        interface PinEntry extends Base {
+        PinEntry: {
             type: 'TimelinePinEntry';
             entry: EntryTypes['Tweet'];
-        }
+        };
 
-        interface AddEntries extends Base {
+        AddEntries: {
             type: 'TimelineAddEntries';
             entries: Entry[];
-        }
+        };
 
-        interface Terminate extends Base {
+        Terminate: {
             type: 'TimelineTerminateTimeline';
-        }
-    }
+        };
+    }>;
 }

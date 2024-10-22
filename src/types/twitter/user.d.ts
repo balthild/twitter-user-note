@@ -1,4 +1,4 @@
-namespace TwitterAPI {
+declare namespace TwitterAPI {
     interface User {
         __typename: 'User';
         rest_id: string;

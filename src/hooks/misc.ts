@@ -1,5 +1,6 @@
 import type { EmotionCache } from '@emotion/cache';
 import { useLayoutEffect, useSyncExternalStore } from 'react';
+
 import type { CachedExternalStore } from '../stores/base';
 
 // https://github.com/PlasmoHQ/plasmo/issues/1054

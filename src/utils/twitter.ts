@@ -59,7 +59,8 @@ export namespace TwitterURL {
 
         export function isUserTweets(url: URL) {
             if (!isGraphQL(url)) return false;
-            return url.pathname.endsWith('/UserTweets');
+            return url.pathname.endsWith('/UserTweets')
+                || url.pathname.endsWith('/UserTweetsAndReplies');
         }
 
         export function isPinnedTimelines(url: URL) {

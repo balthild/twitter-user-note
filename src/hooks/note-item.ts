@@ -78,17 +78,21 @@ export function normalizeNote(user: TwitterUser, stored?: StoredNote): Note {
 
     const normalize = produce((draft) => {
         for (const key of Object.keys<Note>(draft)) {
-            if (overrides.hasOwnProperty(key)) {
-                draft[key] = overrides[key];
-            } else if (defaults.hasOwnProperty(key)) {
-                draft[key] ??= defaults[key];
-            } else {
+            if (!overrides.hasOwnProperty(key) && !defaults.hasOwnProperty(key)) {
                 delete draft[key];
             }
         }
 
-        for (const key of Object.keys(transformers)) {
-            draft[key] = transformers[key]?.(draft[key]);
+        for (const [key, value] of Object.entries(overrides)) {
+            draft[key] = value;
+        }
+
+        for (const [key, value] of Object.entries(defaults)) {
+            draft[key] ??= value;
+        }
+
+        for (const [key, transformer] of Object.entries(transformers)) {
+            draft[key] = transformer(draft[key]);
         }
     });
 

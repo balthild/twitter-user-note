@@ -78,7 +78,7 @@ class ExtensionStorage {
 
     private addCallback<F>(callbacks: F[], callback: F) {
         const index = callbacks.indexOf(callback);
-        if (index !== -1) {
+        if (index === -1) {
             callbacks.push(callback);
         }
 

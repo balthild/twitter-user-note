@@ -1,4 +1,4 @@
-import { type Draft, produce } from 'immer';
+import { produce } from 'immer';
 import { useCallback, useEffect, useState } from 'react';
 
 import { noteStorage } from '../utils/storage';
@@ -18,7 +18,7 @@ export function useNote(user?: TwitterUser): Optional<NoteItem> {
     const loaded = user && stored && stored[0] === user.id;
     const note = loaded && normalizeNote(user, stored[1]);
 
-    const setFields = useCallback(async (...entries: EntryOf<NoteBase>[]) => {
+    const setFields = useCallback((...entries: EntryOf<NoteBase>[]) => {
         if (!user || !note) return;
 
         const updated = produce(note, (draft) => {
@@ -30,9 +30,10 @@ export function useNote(user?: TwitterUser): Optional<NoteItem> {
         const normalized = normalizeNote(user, updated);
 
         if (isNoteEmpty(normalized)) {
-            await noteStorage.remove(user.id);
-        } else if (normalized !== note) {
-            await noteStorage.set(user.id, updated);
+            return noteStorage.remove(user.id);
+        }
+        if (normalized !== note) {
+            return noteStorage.set(user.id, updated);
         }
     }, [user, note]);
 
@@ -56,15 +57,9 @@ async function fetchNote(id: string) {
 }
 
 function subscribeNote(id: string, callback: (entry: StoredNoteEntry) => void) {
-    const listeners = {
-        [id](change: chrome.storage.StorageChange) {
-            callback([id, change.newValue]);
-        },
-    };
-
-    noteStorage.watch(listeners);
-
-    return () => void noteStorage.unwatch(listeners);
+    return noteStorage.watch<StoredNote>(id, (change) => {
+        callback([id, change.newValue]);
+    });
 }
 
 export function normalizeNote(user: TwitterUser, stored?: StoredNote): Note {

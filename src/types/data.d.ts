@@ -22,4 +22,4 @@ type NoteEntry = readonly [string, Note];
 
 type StoredNote = string | Partial<Note>;
 
-type StoredNoteEntry = readonly [string, StoredNote];
+type StoredNoteEntry = readonly [string, Optional<StoredNote>];

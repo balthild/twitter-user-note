@@ -6,6 +6,7 @@ import type { PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetShadowHostId, Plas
 import { Note } from '../components/Note';
 import { useEmotionWorkaround } from '../hooks/misc';
 import { useTwitterProfileUser } from '../hooks/user';
+import { noteStorage } from '../utils/storage';
 
 const styleElement = document.createElement('style');
 

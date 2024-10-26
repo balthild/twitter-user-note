@@ -76,7 +76,8 @@ export namespace TwitterURL {
         export namespace REST {
             export function isNotifications(url: URL) {
                 if (!isTwitterDomain(url)) return false;
-                return url.pathname === '/i/api/2/notifications/all.json';
+                return url.pathname === '/i/api/2/notifications/all.json'
+                    || url.pathname === '/i/api/2/notifications/device_follow.json';
             }
 
             export function isRecommandations(url: URL) {

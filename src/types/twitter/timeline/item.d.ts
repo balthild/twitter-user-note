@@ -3,7 +3,7 @@ declare namespace TwitterAPI.Timeline {
 
     type ItemContent = ValueOf<ItemContentTypes>;
 
-    type ItemTypes = ApplyMap<ItemContentTypes, 'TwitterAPI.Item'>;
+    type ItemTypes = ApplyIndex<ItemContentTypes, 'TwitterAPI.Item'>;
 
     type ItemContentTypes = DiscriminatedMap<{
         Unknown: {};

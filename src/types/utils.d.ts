@@ -4,18 +4,22 @@ interface ObjectConstructor {
 
 type Optional<T> = T | undefined;
 
-type ValueOf<T> = T[keyof T];
+type Async<T> = Promise<T> | T;
+
+type ValueOf<T, K = keyof T> = K extends keyof T ? T[K] : never;
+
+type EntryOf<T, K = keyof T> = K extends keyof T ? [K, T[K]] : never;
 
 type KeyOfObject<T extends object> = keyof T extends never ? string : keyof T;
 
-type AllKeyOf<T> = T extends Record<infer K, any> ? K : never;
+type KeyOfUnion<T> = T extends any ? keyof T : never;
 
 type ComplementaryFields<T, U> = {
-    [K in Exclude<AllKeyOf<U>, keyof T>]?: never;
+    [K in Exclude<KeyOfUnion<U>, keyof T>]?: never;
 };
 
 type StrictComplementaryFields<T, U> = {
-    [K in Exclude<AllKeyOf<U>, keyof T>]: never;
+    [K in Exclude<KeyOfUnion<U>, keyof T>]: never;
 };
 
 type Discriminated<T, U> =

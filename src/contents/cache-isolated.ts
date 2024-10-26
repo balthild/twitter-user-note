@@ -1,9 +1,9 @@
 import type { PlasmoCSConfig } from 'plasmo';
 
-import { normalizeNote } from '../../hooks/note-item';
-import { cache, cleanupCache } from '../../utils/cache';
-import { devLog } from '../../utils/misc';
-import { noteStorage } from '../../utils/storage';
+import { normalizeNote } from '../hooks/note-item';
+import { cache, cleanupCache } from '../utils/cache';
+import { devLog } from '../utils/misc';
+import { noteStorage } from '../utils/storage';
 
 export const config: PlasmoCSConfig = {
     matches: ['https://twitter.com/*', 'https://x.com/*'],

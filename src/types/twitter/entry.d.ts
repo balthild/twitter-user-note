@@ -9,6 +9,6 @@ declare namespace TwitterAPI {
     }
 }
 
-interface HKT<T> {
+interface TypeMap<T> {
     'TwitterAPI.Entry': TwitterAPI.Entry<T>;
 }

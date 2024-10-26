@@ -1,8 +1,8 @@
 import type { PlasmoCSConfig } from 'plasmo';
 
-import { cache } from '../../utils/cache';
-import { devLog, isDev, noop } from '../../utils/misc';
-import { TwitterURL } from '../../utils/twitter';
+import { cache } from '../utils/cache';
+import { devLog, isDev, noop } from '../utils/misc';
+import { TwitterURL } from '../utils/twitter';
 
 export const config: PlasmoCSConfig = {
     matches: ['https://twitter.com/*', 'https://x.com/*'],
@@ -55,7 +55,7 @@ function interceptXHR() {
     devLog('Intercepting XHR');
 }
 
-async function interceptResponse(url: URL, response: <T>() => Promise<T>) {
+async function interceptResponse(url: URL, response: <T>() => Async<T>) {
     if (TwitterURL.API.isUser(url)) {
         const json = await response<TwitterAPI.Response.User>();
         const user = json.data.user.result;

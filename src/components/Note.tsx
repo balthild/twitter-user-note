@@ -2,7 +2,9 @@ import styled from '@emotion/styled';
 import { useId, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEventHandler, KeyboardEventHandler } from 'react';
 
+import { useEditable } from '../hooks/misc';
 import { useNote } from '../hooks/note-item';
+import { noop } from '../utils/misc';
 
 export interface NoteProps {
     user: Optional<TwitterUser>;
@@ -13,27 +15,20 @@ export function Note(props: NoteProps) {
     const user = props.user;
     const note = useNote(user);
 
-    const [input, setInput] = useState('');
-    const [editing, setEditing] = useState(false);
-    const [saving, setSaving] = useState(false);
+    const input = useEditable(note?.note ?? '', note?.setText ?? noop);
 
     const [renderedUserId, setRenderedUserId] = useState(user?.id);
     if (user?.id !== renderedUserId) {
         setRenderedUserId(user?.id);
-        setEditing(false);
-        setSaving(false);
+        input.cancel();
     }
 
     const loading = !user || !note;
-    const working = loading || saving;
-
-    const noteText = note?.note ?? '';
-    const inputText = user ? (editing ? input : noteText) : '';
-    const dirty = inputText !== noteText;
+    const working = loading || input.saving;
 
     const onInput: FormEventHandler<HTMLTextAreaElement> = (e) => {
         e.preventDefault();
-        setInput(e.currentTarget.value);
+        input.input(e.currentTarget.value);
     };
 
     const onType: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
@@ -42,34 +37,25 @@ export function Note(props: NoteProps) {
         }
     };
 
-    const onEdit = () => {
-        if (!user || editing || working || props.readonly) {
-            return false;
+    const onFocus = () => {
+        if (!working && !props.readonly) {
+            input.edit();
         }
-
-        setInput(noteText);
-        setEditing(true);
     };
 
     const onBlur = () => {
-        if (editing && !dirty) {
-            onCancel();
+        if (!input.dirty) {
+            input.cancel();
         }
     };
 
     const onCancel = () => {
-        setEditing(false);
+        input.cancel();
     };
 
     const onSave: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
-
-        setSaving(true);
-
-        await note?.setText(input.trim());
-
-        setEditing(false);
-        setSaving(false);
+        input.persist();
     };
 
     const inputId = useId();
@@ -80,7 +66,7 @@ export function Note(props: NoteProps) {
 
         inputRef.current.style.height = 'unset';
         inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
-    }, [inputText]);
+    }, [input.rendered]);
 
     return (
         <Form onSubmit={onSave}>
@@ -91,17 +77,16 @@ export function Note(props: NoteProps) {
                 ref={inputRef}
                 onInput={onInput}
                 onKeyDown={onType}
-                onClick={onEdit}
-                onFocus={onEdit}
+                onFocus={onFocus}
                 onBlur={onBlur}
                 className={props.readonly ? 'readonly' : 'editable'}
                 placeholder={loading ? 'Loading...' : 'Write a note...'}
-                readOnly={!editing}
+                readOnly={!input.editing}
                 disabled={working}
-                value={inputText}
+                value={input.rendered}
             />
 
-            <Actions className={editing && dirty ? 'show' : ''}>
+            <Actions className={input.dirty ? 'show' : ''}>
                 <Button type="submit" disabled={working}>
                     Save
                 </Button>

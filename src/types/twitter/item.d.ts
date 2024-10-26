@@ -8,6 +8,6 @@ declare namespace TwitterAPI {
     }
 }
 
-interface HKT<T> {
+interface TypeMap<T> {
     'TwitterAPI.Item': TwitterAPI.Item<T>;
 }

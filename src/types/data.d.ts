@@ -4,14 +4,18 @@ interface TwitterUser {
     readonly nickname: string;
 }
 
-interface Note {
-    readonly username: string;
-    readonly nickname: string;
+interface NoteBase {
     readonly note: string;
 }
 
+interface Note extends NoteBase {
+    readonly username: string;
+    readonly nickname: string;
+}
+
 interface NoteItem extends Note {
-    setText(note: string): Promise<void> | void;
+    setFields(...entries: EntryOf<NoteBase>[]): Async<void>;
+    setText(note: string): Async<void>;
 }
 
 type NoteEntry = readonly [string, Note];

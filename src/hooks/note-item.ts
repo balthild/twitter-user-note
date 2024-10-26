@@ -1,5 +1,5 @@
 import { type Draft, produce } from 'immer';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { noteStorage } from '../utils/storage';
 
@@ -15,11 +15,39 @@ export function useNote(user?: TwitterUser): Optional<NoteItem> {
         return subscribeNote(user.id, setStored);
     }, [user?.id]);
 
-    if (!user || !stored || stored[0] !== user.id) {
-        return;
-    }
+    const loaded = user && stored && stored[0] === user.id;
+    const note = loaded && normalizeNote(user, stored[1]);
 
-    return toNoteItem(user, stored[1]);
+    const setFields = useCallback(async (...entries: EntryOf<NoteBase>[]) => {
+        if (!user || !note) return;
+
+        const updated = produce(note, (draft) => {
+            for (const [key, value] of entries) {
+                draft[key] = value;
+            }
+        });
+
+        const normalized = normalizeNote(user, updated);
+
+        if (isNoteEmpty(normalized)) {
+            await noteStorage.remove(user.id);
+        } else if (normalized !== note) {
+            await noteStorage.set(user.id, updated);
+        }
+    }, [user, note]);
+
+    const setText = useCallback(
+        (note: string) => setFields(['note', note]),
+        [setFields],
+    );
+
+    if (!note) return;
+
+    return {
+        ...note,
+        setFields,
+        setText,
+    };
 }
 
 async function fetchNote(id: string) {
@@ -39,28 +67,6 @@ function subscribeNote(id: string, callback: (entry: StoredNoteEntry) => void) {
     return () => void noteStorage.unwatch(listeners);
 }
 
-function toNoteItem(user: TwitterUser, stored?: StoredNote): NoteItem {
-    const note = normalizeNote(user, stored);
-
-    const update = (receipt: (draft: Draft<Note>) => void) => {
-        const value = produce(note, receipt);
-        if (isNoteEmpty(value)) {
-            noteStorage.remove(user.id);
-        } else if (value !== note) {
-            noteStorage.set(user.id, value);
-        }
-    };
-
-    return {
-        ...note,
-        setText(note: string) {
-            return update((draft) => {
-                draft.note = note;
-            });
-        },
-    };
-}
-
 export function normalizeNote(user: TwitterUser, stored?: StoredNote): Note {
     const overrides: Partial<Note> = {
         username: user.username,
@@ -69,6 +75,10 @@ export function normalizeNote(user: TwitterUser, stored?: StoredNote): Note {
 
     const defaults: Partial<Note> = {
         note: '',
+    };
+
+    const transformers: Partial<ApplyIndex<Note, 'Mapper'>> = {
+        note: (value) => value.trim(),
     };
 
     const normalize = produce((draft) => {
@@ -80,6 +90,10 @@ export function normalizeNote(user: TwitterUser, stored?: StoredNote): Note {
             } else {
                 delete draft[key];
             }
+        }
+
+        for (const key of Object.keys(transformers)) {
+            draft[key] = transformers[key]?.(draft[key]);
         }
     });
 

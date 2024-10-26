@@ -56,6 +56,8 @@ function interceptXHR() {
 }
 
 async function interceptResponse(url: URL, response: <T>() => Async<T>) {
+    const cacheTwitterUser = cacheTwitterUserDeduplicate();
+
     if (TwitterURL.API.isUser(url)) {
         const json = await response<TwitterAPI.Response.User>();
         const user = json.data.user.result;
@@ -215,25 +217,32 @@ function processTimeline(timeline: TwitterAPI.Timeline, callback: WalkUserCallba
 
 type TwitterAPIUserMixed = Discriminated<TwitterAPI.User, TwitterAPI.REST.User>;
 
-async function cacheTwitterUser(user: Optional<TwitterAPIUserMixed>) {
-    const resolved = resolveTwitterUser(user);
-    if (!resolved) return;
+function cacheTwitterUserDeduplicate() {
+    const cached = new Set();
 
-    const id = resolved.id;
-    const key = resolved.username.toLowerCase();
+    return async (user: Optional<TwitterAPIUserMixed>) => {
+        const resolved = resolveTwitterUser(user);
+        if (!resolved) return;
 
-    await cache.users.put({
-        key,
-        timestamp: new Date().getTime(),
-        value: resolved,
-    });
+        const id = resolved.id;
+        const key = resolved.username.toLowerCase();
+        if (cached.has(id)) return;
 
-    dispatchEvent(
-        new CustomEvent(
-            'cache-twitter-user',
-            { detail: { id, key } },
-        ),
-    );
+        await cache.users.put({
+            key,
+            timestamp: new Date().getTime(),
+            value: resolved,
+        });
+
+        dispatchEvent(
+            new CustomEvent(
+                'cache-twitter-user',
+                { detail: { id, key } },
+            ),
+        );
+
+        cached.add(id);
+    };
 }
 
 function resolveTwitterUser(user: Optional<TwitterAPIUserMixed>): Optional<TwitterUser> {

@@ -1,7 +1,7 @@
-import type { EmotionCache } from '@emotion/cache';
+import { EmotionCache } from '@emotion/cache';
 import { useCallback, useLayoutEffect, useState, useSyncExternalStore } from 'react';
 
-import type { CachedExternalStore } from '../stores/base';
+import { CachedExternalStore } from '~/stores/base';
 
 // https://github.com/PlasmoHQ/plasmo/issues/1054
 export function useEmotionWorkaround(cache: EmotionCache) {

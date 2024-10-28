@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 import { useCallback, useEffect, useState } from 'react';
 
-import { noteStorage } from '../utils/storage';
+import { noteStorage } from '~/utils/storage';
 
 export function useNote(user?: TwitterUser): Optional<NoteItem> {
     // undefined: loading

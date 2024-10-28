@@ -1,26 +1,18 @@
-import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import styled from '@emotion/styled';
-import type {
+import {
+    PlasmoCreateShadowRoot,
     PlasmoCSConfig,
     PlasmoCSUIProps,
     PlasmoGetInlineAnchor,
     PlasmoGetShadowHostId,
-    PlasmoGetStyle,
 } from 'plasmo';
 
-import { Note } from '../components/Note';
-import { useEmotionWorkaround } from '../hooks/misc';
-import { useTwitterCardUser } from '../hooks/user';
+import { Note } from '~/components/Note';
+import { useTwitterCardUser } from '~/hooks/user';
+import { createShadowEmotion } from '~/utils/style';
 
-const styleElement = document.createElement('style');
-
-const styleCache = createCache({
-    key: 'twitter-user-note-card-emotion-cache',
-    container: styleElement,
-});
-
-export const getStyle: PlasmoGetStyle = () => styleElement;
+const emotion = createShadowEmotion('twitter-user-note-card-emotion');
 
 export const config: PlasmoCSConfig = {
     matches: ['https://twitter.com/*', 'https://x.com/*'],
@@ -38,15 +30,19 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = () => {
     };
 };
 
+export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) => {
+    const root = shadowHost.attachShadow({ mode: 'open' });
+    emotion.sheet.attach(root);
+    return root;
+};
+
 export const getShadowHostId: PlasmoGetShadowHostId = () => 'twitter-user-note-card-shadow-host';
 
 export default function (props: PlasmoCSUIProps) {
-    useEmotionWorkaround(styleCache);
-
     const user = useTwitterCardUser(props.anchor);
 
     return (
-        <CacheProvider value={styleCache}>
+        <CacheProvider value={emotion.cache}>
             <Container>
                 <Note user={user} readonly={true} />
             </Container>

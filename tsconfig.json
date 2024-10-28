@@ -9,8 +9,12 @@
     "./src/**/*.tsx"
   ],
   "compilerOptions": {
+    "paths": {
+      "~/*": ["./src/*"],
+    },
     "strict": true,
     "strictNullChecks": true,
-    "skipLibCheck": false
+    "skipLibCheck": false,
+    "verbatimModuleSyntax": false
   }
 }

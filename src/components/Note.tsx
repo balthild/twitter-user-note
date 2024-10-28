@@ -1,10 +1,9 @@
 import styled from '@emotion/styled';
-import { useId, useLayoutEffect, useRef, useState } from 'react';
-import type { FormEventHandler, KeyboardEventHandler } from 'react';
+import { FormEventHandler, KeyboardEventHandler, useId, useLayoutEffect, useRef, useState } from 'react';
 
-import { useEditable } from '../hooks/misc';
-import { useNote } from '../hooks/note-item';
-import { noop } from '../utils/misc';
+import { useEditable } from '~/hooks/misc';
+import { useNote } from '~/hooks/note-item';
+import { noop } from '~/utils/misc';
 
 export interface NoteProps {
     user: Optional<TwitterUser>;

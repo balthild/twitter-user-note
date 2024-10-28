@@ -8,6 +8,7 @@ export namespace TwitterURL {
         'jobs',
         'settings',
         'account',
+        'compose',
     ]);
 
     export function getUsernameLowercase(pathname: string) {

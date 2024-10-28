@@ -1,6 +1,7 @@
 import { produce } from 'immer';
 
-import { cache } from '../utils/cache';
+import { cache } from '~/utils/cache';
+
 import { CachedExternalStore } from './base';
 
 export class TwitterUserStore extends CachedExternalStore<TwitterUser> {

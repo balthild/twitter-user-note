@@ -1,8 +1,9 @@
-import type { PlasmoCSUIAnchor } from 'plasmo';
+import { PlasmoCSUIAnchor } from 'plasmo';
 import { useEffect } from 'react';
 
-import { twitterCardUsernameStore, twitterCardUserStore } from '../stores/card';
-import { twitterProfileUserStore } from '../stores/profile';
+import { twitterCardUsernameStore, twitterCardUserStore } from '~/stores/card';
+import { twitterProfileUserStore } from '~/stores/profile';
+
 import { useStore } from './misc';
 
 export function useTwitterProfileUser() {

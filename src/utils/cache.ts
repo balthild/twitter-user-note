@@ -1,7 +1,6 @@
-import Dexie from 'dexie';
-import type { EntityTable } from 'dexie';
+import { Dexie, EntityTable } from 'dexie';
 
-import { devLog } from './misc';
+import { debug } from './misc';
 
 interface CacheEntity<T> {
     key: string;
@@ -30,5 +29,5 @@ export async function cleanupCache() {
 
     const total = rows.reduce((a, b) => a + b, 0);
 
-    devLog(`Removed ${total} Stale Cache`);
+    debug(`Removed ${total} Stale Cache`);
 }

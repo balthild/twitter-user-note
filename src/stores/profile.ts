@@ -1,4 +1,5 @@
-import { TwitterURL } from '../utils/twitter';
+import { TwitterURL } from '~/utils/twitter';
+
 import { CachedExternalStore as Store } from './base';
 import { TwitterUserStore } from './user';
 
@@ -23,7 +24,12 @@ export class ProfileUsernameStore extends Store<string> {
 
     private update(pathname: string) {
         const tx = this.transaction();
+
         const name = TwitterURL.getUsernameLowercase(pathname);
+        if (!name) {
+            return tx.abort();
+        }
+
         return tx.put(name).commit();
     }
 }

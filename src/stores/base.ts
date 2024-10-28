@@ -1,4 +1,4 @@
-import { devLog } from '../utils/misc';
+import { debug } from '~/utils/misc';
 
 type Listener = () => void;
 
@@ -45,7 +45,7 @@ export abstract class CachedExternalStore<T> {
             listener();
         }
 
-        devLog(this.constructor.name, this.current);
+        debug(this.constructor.name, this.current);
     }
 }
 

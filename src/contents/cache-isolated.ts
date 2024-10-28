@@ -1,9 +1,9 @@
-import type { PlasmoCSConfig } from 'plasmo';
+import { PlasmoCSConfig } from 'plasmo';
 
-import { normalizeNote } from '../hooks/note-item';
-import { cache, cleanupCache } from '../utils/cache';
-import { devLog } from '../utils/misc';
-import { noteStorage } from '../utils/storage';
+import { normalizeNote } from '~/hooks/note-item';
+import { cache, cleanupCache } from '~/utils/cache';
+import { debug } from '~/utils/misc';
+import { noteStorage } from '~/utils/storage';
 
 export const config: PlasmoCSConfig = {
     matches: ['https://twitter.com/*', 'https://x.com/*'],
@@ -26,9 +26,9 @@ function listenCacheEvent() {
 
         if (stored !== note) {
             await noteStorage.set(event.detail.id, note);
-            devLog('Updated User Info in Note:', note);
+            debug('Updated User Info in Note:', note);
         }
     });
 
-    devLog('Listening Cache Event');
+    debug('Listening Cache Event');
 }

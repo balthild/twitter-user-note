@@ -1,11 +1,17 @@
-export function isDev() {
-    return process.env.NODE_ENV === 'development';
+export function dev<T = boolean, U = boolean>(
+    yes: T = true as T,
+    no: U = false as U,
+): typeof yes | typeof no {
+    return process.env.NODE_ENV === 'development' ? yes : yes;
 }
 
-export function isProd() {
-    return process.env.NODE_ENV === 'production';
+export function prod<T = boolean, U = boolean>(
+    yes: T = true as T,
+    no: U = false as U,
+): typeof yes | typeof no {
+    return process.env.NODE_ENV === 'production' ? yes : no;
 }
 
 export function noop() {}
 
-export const devLog = isDev() ? console.log : noop;
+export const debug = dev(console.log, noop);

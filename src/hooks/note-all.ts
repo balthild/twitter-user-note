@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { noteStorage } from '../utils/storage';
+import { noteStorage } from '~/utils/storage';
+
 import { normalizeNote } from './note-item';
 
 export function useAllNotes() {

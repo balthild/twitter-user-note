@@ -1,8 +1,8 @@
-import type { PlasmoCSConfig } from 'plasmo';
+import { PlasmoCSConfig } from 'plasmo';
 
-import { cache } from '../utils/cache';
-import { devLog, isDev, noop } from '../utils/misc';
-import { TwitterURL } from '../utils/twitter';
+import { cache } from '~/utils/cache';
+import { debug, dev, noop } from '~/utils/misc';
+import { TwitterURL } from '~/utils/twitter';
 
 export const config: PlasmoCSConfig = {
     matches: ['https://twitter.com/*', 'https://x.com/*'],
@@ -27,7 +27,7 @@ function interceptFetch() {
         return response;
     };
 
-    devLog('Intercepting Fetch');
+    debug('Intercepting Fetch');
 }
 
 function interceptXHR() {
@@ -52,7 +52,7 @@ function interceptXHR() {
         return open.apply(this, args);
     };
 
-    devLog('Intercepting XHR');
+    debug('Intercepting XHR');
 }
 
 async function interceptResponse(url: URL, response: <T>() => Async<T>) {
@@ -158,7 +158,7 @@ async function interceptResponse(url: URL, response: <T>() => Async<T>) {
         return;
     }
 
-    if (isDev() && !url.hostname.includes('twimg')) {
+    if (dev() && !url.hostname.includes('twimg')) {
         const json = response();
         const text = JSON.stringify(json);
         if (text.includes('screen_name')) {

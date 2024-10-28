@@ -1,4 +1,5 @@
-import { TwitterURL } from '../utils/twitter';
+import { TwitterURL } from '~/utils/twitter';
+
 import { CachedExternalStore as Store } from './base';
 import { TwitterUserStore } from './user';
 

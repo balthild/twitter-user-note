@@ -15,7 +15,7 @@ class ExtensionStorage {
     private callbacksItem: Record<string, WatchItemCallback[]> = {};
     private callbacksAll: WatchAllCallback[] = [];
 
-    constructor(protected config: ExtensionStorageConfig) {
+    constructor(protected readonly config: ExtensionStorageConfig) {
         this.area().onChanged.addListener((changes) => {
             this.onChange(changes);
         });

@@ -10,9 +10,9 @@ import {
 
 import { Note } from '~/components/Note';
 import { useTwitterCardUser } from '~/hooks/user';
-import { createShadowEmotion } from '~/utils/style';
+import { ContentScriptFactory } from '~/utils/plasmo';
 
-const emotion = createShadowEmotion('twitter-user-note-card-emotion');
+const factory = new ContentScriptFactory(import.meta);
 
 export const config: PlasmoCSConfig = {
     matches: ['https://twitter.com/*', 'https://x.com/*'],
@@ -30,19 +30,15 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = () => {
     };
 };
 
-export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) => {
-    const root = shadowHost.attachShadow({ mode: 'open' });
-    emotion.sheet.attach(root);
-    return root;
-};
+export const createShadowRoot: PlasmoCreateShadowRoot = factory.getShadowRootFactory();
 
-export const getShadowHostId: PlasmoGetShadowHostId = () => 'twitter-user-note-card-shadow-host';
+export const getShadowHostId: PlasmoGetShadowHostId = () => factory.getShadowHostId();
 
 export default function (props: PlasmoCSUIProps) {
     const user = useTwitterCardUser(props.anchor);
 
     return (
-        <CacheProvider value={emotion.cache}>
+        <CacheProvider value={factory.getEmotionCache()}>
             <Container>
                 <Note user={user} readonly={true} />
             </Container>

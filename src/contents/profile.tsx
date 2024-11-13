@@ -4,9 +4,9 @@ import { PlasmoCreateShadowRoot, PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGe
 
 import { Note } from '~/components/Note';
 import { useTwitterProfileUser } from '~/hooks/user';
-import { createShadowEmotion } from '~/utils/style';
+import { ContentScriptFactory } from '~/utils/plasmo';
 
-const emotion = createShadowEmotion('twitter-user-note-profile-emotion');
+const factory = new ContentScriptFactory(import.meta);
 
 export const config: PlasmoCSConfig = {
     matches: ['https://twitter.com/*', 'https://x.com/*'],
@@ -17,19 +17,15 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = () => ({
     insertPosition: 'afterend',
 });
 
-export const createShadowRoot: PlasmoCreateShadowRoot = (shadowHost) => {
-    const root = shadowHost.attachShadow({ mode: 'open' });
-    emotion.sheet.attach(root);
-    return root;
-};
+export const createShadowRoot: PlasmoCreateShadowRoot = factory.getShadowRootFactory();
 
-export const getShadowHostId: PlasmoGetShadowHostId = () => 'twitter-user-note-profile-shadow-host';
+export const getShadowHostId: PlasmoGetShadowHostId = () => factory.getShadowHostId();
 
 export default function () {
     const user = useTwitterProfileUser();
 
     return (
-        <CacheProvider value={emotion.cache}>
+        <CacheProvider value={factory.getEmotionCache()}>
             <Container>
                 <Note user={user} readonly={false} />
             </Container>

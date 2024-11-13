@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { noteStorage } from '~/utils/storage';
+import { storages } from '~/utils/storage';
 
 import { normalizeNote } from './note-item';
 
@@ -18,7 +18,7 @@ export function useAllNotes() {
 async function fetchAllNotes() {
     const entries = [];
 
-    for (const [id, stored] of await noteStorage.getAll()) {
+    for (const [id, stored] of await storages.note.getAll()) {
         if (!stored) continue;
 
         const user = {
@@ -36,5 +36,5 @@ async function fetchAllNotes() {
 }
 
 function subscribeAllNotes(callback: () => void) {
-    return noteStorage.watchAll(callback);
+    return storages.note.watchAll(callback);
 }

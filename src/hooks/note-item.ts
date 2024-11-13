@@ -1,7 +1,6 @@
 import { produce } from 'immer';
 import { useCallback, useEffect, useState } from 'react';
-
-import { noteStorage } from '~/utils/storage';
+import { storages } from '~/utils/storage';
 
 export function useNote(user?: TwitterUser): Optional<NoteItem> {
     // undefined: loading
@@ -30,10 +29,10 @@ export function useNote(user?: TwitterUser): Optional<NoteItem> {
         const normalized = normalizeNote(user, updated);
 
         if (isNoteEmpty(normalized)) {
-            return noteStorage.remove(user.id);
+            return storages.note.remove(user.id);
         }
         if (normalized !== note) {
-            return noteStorage.set(user.id, updated);
+            return storages.note.set(user.id, updated);
         }
     }, [user, note]);
 
@@ -52,12 +51,12 @@ export function useNote(user?: TwitterUser): Optional<NoteItem> {
 }
 
 async function fetchNote(id: string) {
-    const stored = await noteStorage.get<StoredNote>(id);
+    const stored = await storages.note.get<StoredNote>(id);
     return [id, stored] as StoredNoteEntry;
 }
 
 function subscribeNote(id: string, callback: (entry: StoredNoteEntry) => void) {
-    return noteStorage.watch<StoredNote>(id, (change) => {
+    return storages.note.watch<StoredNote>(id, (change) => {
         callback([id, change.newValue]);
     });
 }

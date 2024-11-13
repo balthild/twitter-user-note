@@ -1,11 +1,16 @@
-import createCache from '@emotion/cache';
+import createCache, { EmotionCache } from '@emotion/cache';
 import { StyleSheet } from '@emotion/sheet';
 
 import { dev } from './misc';
 import { IterableWeakSet } from './weakset';
 
+export interface ShadowEmotion {
+    readonly cache: EmotionCache;
+    readonly sheet: ShadowStyleSheet;
+}
+
 // https://github.com/PlasmoHQ/plasmo/issues/1054
-export function createShadowEmotion(key: string) {
+export function createShadowEmotion(key: string): ShadowEmotion {
     const cache = createCache({ key });
 
     const sheet = new ShadowStyleSheet({
@@ -63,6 +68,8 @@ class ShadowStyleSheet extends StyleSheet {
     }
 
     flush() {
+        super.flush();
+
         this.sheets = [];
         this.roots.forEach(this.adopt);
     }

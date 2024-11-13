@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 
+import { Button } from './components/Button';
 import { useAllNotes } from './hooks/note-all';
 
 export default function ListNotes() {
@@ -7,7 +8,13 @@ export default function ListNotes() {
 
     return (
         <Container>
-            <h1>Twitter User Notes</h1>
+            <Section>
+                <h1>Twitter User Notes</h1>
+            </Section>
+
+            <Actions>
+                <Button>Export</Button>
+            </Actions>
 
             <Table>
                 <thead>
@@ -38,10 +45,22 @@ export default function ListNotes() {
 }
 
 const Container = styled.section`
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', 'Liberation Sans', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     font-size: 16px;
     margin: 2.5em auto 3em;
     padding: 0 2em;
     max-width: 1280px;
+`;
+
+const Section = styled.section`
+    margin: 1.25rem 0;
+`;
+
+const Actions = styled(Section)`
+    button {
+        font-family: 'HelveticaNeue', 'Helvetica Neue', Helvetica, sans-serif;
+        font-size: 15px;
+    }
 `;
 
 const Table = styled.table`

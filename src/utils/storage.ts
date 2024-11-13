@@ -135,7 +135,19 @@ class ExtensionStorage {
     }
 }
 
-export const noteStorage = new ExtensionStorage({
-    area: chrome.storage.sync,
-    prefix: '/notes/',
+export const storages = Object.freeze({
+    note: new ExtensionStorage({
+        area: chrome.storage.sync,
+        prefix: '/notes/',
+    }),
+    settings: Object.freeze({
+        sync: new ExtensionStorage({
+            area: chrome.storage.sync,
+            prefix: '/settings/',
+        }),
+        local: new ExtensionStorage({
+            area: chrome.storage.local,
+            prefix: '/settings/',
+        }),
+    }),
 });

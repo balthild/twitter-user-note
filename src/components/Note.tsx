@@ -5,6 +5,8 @@ import { useEditable } from '~/hooks/misc';
 import { useNote } from '~/hooks/note-item';
 import { noop } from '~/utils/misc';
 
+import { Button } from './Button';
+
 export interface NoteProps {
     user: Optional<TwitterUser>;
     readonly: boolean;
@@ -86,7 +88,7 @@ export function Note(props: NoteProps) {
             />
 
             <Actions className={input.dirty ? 'show' : ''}>
-                <Button type="submit" disabled={working}>
+                <Button type="submit" className="primary" disabled={working}>
                     Save
                 </Button>
                 <Button type="button" disabled={working} onClick={onCancel}>
@@ -149,37 +151,5 @@ const Actions = styled.div`
 
     &.show {
         display: flex;
-    }
-`;
-
-const Button = styled.button`
-    padding: 0.5em 1.5em;
-    font-size: inherit;
-    font-family: inherit;
-    border: none;
-    border-radius: 0.125rem;
-    transition: background-color 0.2s;
-    cursor: pointer;
-
-    &:disabled {
-        opacity: 0.5;
-    }
-
-    &[type='submit'] {
-        background: #1d9bf0;
-        color: #ffffff;
-
-        &:hover {
-            background: #1a8cd8;
-        }
-    }
-
-    &[type='button'] {
-        background: light-dark(#eff1f5, rgb(255 255 255 / 15%));
-        color: inherit;
-
-        &:hover {
-            background: light-dark(#e0e4eb, rgb(255 255 255 / 20%));
-        }
     }
 `;

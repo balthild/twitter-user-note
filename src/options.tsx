@@ -1,10 +1,49 @@
 import styled from '@emotion/styled';
+import { FormEventHandler, useRef } from 'react';
 
-import { Button } from './components/Button';
-import { useAllNotes } from './hooks/note-all';
+import { BaseContainer, Button } from './components/styled';
+import { useExecutor } from './hooks/misc';
+import { useNoteList } from './hooks/note';
+import { download } from './utils/misc';
+import { dump, merge } from './utils/sync';
 
 export default function ListNotes() {
-    const notes = useAllNotes();
+    const notes = useNoteList();
+
+    const executor = useExecutor();
+
+    const onExport = executor.wrap(async () => {
+        const date = new Date().toLocaleString('sv').split(' ').shift();
+        const name = `note-export-${date}.json`;
+
+        const data = await dump();
+        const json = JSON.stringify(data, null, 2);
+
+        download(name, json);
+    });
+
+    const onPick = () => {
+        executor.clear();
+        requestIdleCallback(() => importInputRef.current?.click());
+    };
+
+    const onImport = executor.wrap<FormEventHandler<HTMLInputElement>>(async (e) => {
+        const file = e.currentTarget.files?.[0];
+        if (!file) return;
+
+        e.currentTarget.value = '';
+
+        const json = await file.text();
+        const data = JSON.parse(json);
+
+        await merge(data);
+        await chrome.runtime.sendMessage<ExtensionMessage>({
+            action: 'sync-notes',
+            name: 'twitter',
+        });
+    });
+
+    const importInputRef = useRef<HTMLInputElement>(null);
 
     return (
         <Container>
@@ -12,9 +51,16 @@ export default function ListNotes() {
                 <h1>Twitter User Notes</h1>
             </Section>
 
-            <Actions>
-                <Button>Export</Button>
+            <Actions className={notes ? '' : 'hidden'}>
+                <Button className="light" disabled={executor.working} onClick={onExport}>Export</Button>
+                <Button className="light" disabled={executor.working} onClick={onPick}>Import</Button>
             </Actions>
+
+            <input type="file" className="hidden" ref={importInputRef} onInput={onImport} />
+
+            <ErrorMessage className={executor.error ? '' : 'hidden'}>
+                <p>Error: {executor.error?.message}</p>
+            </ErrorMessage>
 
             <Table>
                 <thead>
@@ -24,7 +70,7 @@ export default function ListNotes() {
                     </tr>
                 </thead>
                 <tbody>
-                    {notes.map(([id, note]) => (
+                    {(notes ?? []).map(([id, note]) => (
                         <tr key={id}>
                             <ItemCell>
                                 <Paragraph>
@@ -44,8 +90,7 @@ export default function ListNotes() {
     );
 }
 
-const Container = styled.section`
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', 'Liberation Sans', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+const Container = styled(BaseContainer)`
     font-size: 16px;
     margin: 2.5em auto 3em;
     padding: 0 2em;
@@ -56,11 +101,19 @@ const Section = styled.section`
     margin: 1.25rem 0;
 `;
 
-const Actions = styled(Section)`
-    button {
-        font-family: 'HelveticaNeue', 'Helvetica Neue', Helvetica, sans-serif;
-        font-size: 15px;
+const ErrorMessage = styled(Section)`
+    color: #cc0000;
+
+    p {
+        margin: 0;
     }
+`;
+
+const Actions = styled(Section)`
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', 'Liberation Sans', Arial, sans-serif, 'Apple  Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    font-size: 15px;
+    display: flex;
+    gap: 1em;
 `;
 
 const Table = styled.table`

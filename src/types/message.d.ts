@@ -4,8 +4,16 @@ interface UrlChangedMessage {
     pathname: string;
 }
 
+interface SyncNotesMessage {
+    action: 'sync-notes';
+    name: string;
+}
+
 interface UnknownMessage {
     action: never;
 }
 
-type ExtensionMessage = UrlChangedMessage | UnknownMessage;
+type ExtensionMessage =
+    | UrlChangedMessage
+    | SyncNotesMessage
+    | UnknownMessage;

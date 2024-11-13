@@ -9,6 +9,7 @@ import {
 } from 'plasmo';
 
 import { Note } from '~/components/Note';
+import { BaseContainer } from '~/components/styled';
 import { useTwitterCardUser } from '~/hooks/user';
 import { ContentScriptFactory } from '~/utils/plasmo';
 
@@ -21,11 +22,10 @@ export const config: PlasmoCSConfig = {
 export const getInlineAnchor: PlasmoGetInlineAnchor = () => {
     const card = document.querySelector('[data-testid="HoverCard"]');
     const link = card?.querySelector('a[role="link"][href^="/"][href$="/following"]');
-
-    const anchor = link ? card!.querySelector(':scope > div > div > div:nth-child(2)') : null;
+    if (!link) return null!;
 
     return {
-        element: anchor!,
+        element: card!.querySelector(':scope > div > div > div:nth-child(2)')!,
         insertPosition: 'afterend',
     };
 };
@@ -46,7 +46,7 @@ export default function (props: PlasmoCSUIProps) {
     );
 }
 
-const Container = styled.section`
+const Container = styled(BaseContainer)`
     width: 100%;
     margin-top: 0.8rem;
 `;

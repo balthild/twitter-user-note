@@ -1,3 +1,6 @@
+import { noop } from './utils/misc';
+import { migrateLegacyNotes } from './utils/note';
+import { sync } from './utils/sync';
 import { TwitterURL } from './utils/twitter';
 
 chrome.action.onClicked.addListener(() => {
@@ -16,3 +19,19 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
         pathname: url.pathname,
     });
 });
+
+chrome.runtime.onMessage.addListener((message: ExtensionMessage) => {
+    if (message.action === 'sync-notes') {
+        waitUntil(sync());
+    }
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+    waitUntil(migrateLegacyNotes());
+});
+
+// https://developer.chrome.com/docs/extensions/develop/migrate/to-service-workers#keep-sw-alive
+function waitUntil(promise: Promise<void>) {
+    const keepAlive = setInterval(chrome.runtime.getPlatformInfo, 25 * 1000);
+    promise.catch(noop).then(() => clearInterval(keepAlive));
+}

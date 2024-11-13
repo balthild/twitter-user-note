@@ -1,8 +1,3 @@
-interface ExtensionStorageConfig {
-    area: chrome.storage.StorageArea;
-    prefix?: string;
-}
-
 interface StorageChange<T = any> extends chrome.storage.StorageChange {
     newValue?: T;
     oldValue?: T;
@@ -11,11 +6,21 @@ interface StorageChange<T = any> extends chrome.storage.StorageChange {
 type WatchItemCallback<T = any> = (change: StorageChange<T>) => void;
 type WatchAllCallback<T = any> = (entries: [string, StorageChange<T>][]) => void;
 
-class ExtensionStorage {
+interface StorageCollectionConfig {
+    area: chrome.storage.StorageArea;
+    collection?: string;
+    timestamp?: boolean;
+}
+
+export class StorageCollection<V = any> {
     private callbacksItem: Record<string, WatchItemCallback[]> = {};
     private callbacksAll: WatchAllCallback[] = [];
 
-    constructor(protected readonly config: ExtensionStorageConfig) {
+    constructor(protected readonly config: StorageCollectionConfig) {
+        if (config.collection && !/^(\/[0-9A-Za-z_]+)+\/$/.test(config.collection)) {
+            throw new Error('Invalid storage collection');
+        }
+
         this.area().onChanged.addListener((changes) => {
             this.onChange(changes);
         });
@@ -26,10 +31,10 @@ class ExtensionStorage {
     }
 
     public prefix() {
-        return this.config.prefix ?? '';
+        return this.config.collection ?? '';
     }
 
-    public async get<T>(key: string) {
+    public async get<T extends V = V>(key: string) {
         const rawKey = this.addPrefix(key);
         const rawItems = await this.area().get([rawKey]);
         if (!rawItems[rawKey]) return;
@@ -37,7 +42,7 @@ class ExtensionStorage {
         return JSON.parse(rawItems[rawKey]) as T;
     }
 
-    public async getAll<T = any>() {
+    public async getAll<T extends V = V>() {
         const items = await this.area().get(null);
 
         const entries = [] as [string, T][];
@@ -52,7 +57,11 @@ class ExtensionStorage {
         return entries;
     }
 
-    public async set<T>(key: string, value: T) {
+    public async set<T extends V = V>(key: string, value: T, timestamp?: boolean) {
+        if (timestamp ?? this.config.timestamp) {
+            value = { ...value, timestamp: new Date().toISOString() };
+        }
+
         const rawKey = this.addPrefix(key);
         const rawValue = JSON.stringify(value);
 
@@ -66,12 +75,12 @@ class ExtensionStorage {
         await this.area().remove([rawKey]);
     }
 
-    public watch<T>(key: string, callback: WatchItemCallback<T>) {
+    public watch<T extends V = V>(key: string, callback: WatchItemCallback<T>) {
         const callbacks = this.callbacksItem[key] ??= [];
         return this.addCallback(callbacks, callback);
     }
 
-    public watchAll<T>(callback: WatchAllCallback<T>) {
+    public watchAll<T extends V = V>(callback: WatchAllCallback<T>) {
         const callbacks = this.callbacksAll;
         return this.addCallback(callbacks, callback);
     }
@@ -135,19 +144,22 @@ class ExtensionStorage {
     }
 }
 
-export const storages = Object.freeze({
-    note: new ExtensionStorage({
-        area: chrome.storage.sync,
-        prefix: '/notes/',
+export const collections = Object.freeze({
+    note: Object.freeze({
+        twitter: new StorageCollection<Stored<Note>>({
+            area: chrome.storage.local,
+            collection: '/notes/twitter/',
+            timestamp: true,
+        }),
     }),
     settings: Object.freeze({
-        sync: new ExtensionStorage({
+        sync: new StorageCollection({
             area: chrome.storage.sync,
-            prefix: '/settings/',
+            collection: '/settings/',
         }),
-        local: new ExtensionStorage({
+        local: new StorageCollection({
             area: chrome.storage.local,
-            prefix: '/settings/',
+            collection: '/settings/',
         }),
     }),
 });

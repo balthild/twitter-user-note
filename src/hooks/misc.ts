@@ -2,6 +2,7 @@ import { EmotionCache } from '@emotion/cache';
 import { useCallback, useLayoutEffect, useState, useSyncExternalStore } from 'react';
 
 import { CachedExternalStore } from '~/stores/base';
+import { noop } from '~/utils/misc';
 
 // https://github.com/PlasmoHQ/plasmo/issues/1054
 export function useEmotionWorkaround(cache: EmotionCache) {
@@ -17,6 +18,33 @@ export function useStore<T>(store: CachedExternalStore<T>) {
         store.subscribe,
         store.getSnapshot,
     );
+}
+
+export function useExecutor() {
+    const [working, setWorking] = useState(false);
+    const [error, setError] = useState<Error>();
+
+    return {
+        working,
+        error,
+        wrap<T extends (...args: any[]) => Async<any>>(fn: T) {
+            return async (...args: ArgumentsOf<T>) => {
+                setWorking(true);
+                setError(undefined);
+                try {
+                    await fn(...args);
+                } catch (e) {
+                    setError(e as Error);
+                } finally {
+                    setWorking(false);
+                }
+            };
+        },
+        clear() {
+            setWorking(false);
+            setError(undefined);
+        },
+    };
 }
 
 export function useEditable<T>(stored: T, setStored: (value: T) => Async<void>) {

@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { PlasmoCreateShadowRoot, PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetShadowHostId } from 'plasmo';
 
 import { Note } from '~/components/Note';
+import { BaseContainer } from '~/components/styled';
 import { useTwitterProfileUser } from '~/hooks/user';
 import { ContentScriptFactory } from '~/utils/plasmo';
 
@@ -33,7 +34,7 @@ export default function () {
     );
 }
 
-const Container = styled.section`
+const Container = styled(BaseContainer)`
     width: 100%;
     margin-bottom: 1.25rem;
 `;

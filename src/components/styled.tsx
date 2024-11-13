@@ -1,5 +1,11 @@
 import styled from '@emotion/styled';
 
+export const BaseContainer = styled.section`
+    .hidden {
+        display: none !important;
+    }
+`;
+
 export const Button = styled.button`
     height: 2.25em;
     display: flex;
@@ -12,6 +18,7 @@ export const Button = styled.button`
     border-radius: 0.2em;
     background: light-dark(#eff1f5, rgb(255 255 255 / 15%));
     color: inherit;
+    user-select: none;
     transition: background-color 0.2s;
     cursor: pointer;
 
@@ -29,6 +36,14 @@ export const Button = styled.button`
 
         &:hover {
             background: #1a8cd8;
+        }
+    }
+
+    &.light {
+        background: #e6e9ef;
+
+        &:hover {
+            background: #d7dce5;
         }
     }
 `;

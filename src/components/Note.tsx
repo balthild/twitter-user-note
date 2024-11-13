@@ -2,10 +2,10 @@ import styled from '@emotion/styled';
 import { FormEventHandler, KeyboardEventHandler, useId, useLayoutEffect, useRef, useState } from 'react';
 
 import { useEditable } from '~/hooks/misc';
-import { useNote } from '~/hooks/note-item';
+import { useNote } from '~/hooks/note';
 import { noop } from '~/utils/misc';
 
-import { Button } from './Button';
+import { Button } from './styled';
 
 export interface NoteProps {
     user: Optional<TwitterUser>;
@@ -87,7 +87,7 @@ export function Note(props: NoteProps) {
                 value={input.rendered}
             />
 
-            <Actions className={input.dirty ? 'show' : ''}>
+            <Actions className={input.dirty ? '' : 'hidden'}>
                 <Button type="submit" className="primary" disabled={working}>
                     Save
                 </Button>
@@ -145,11 +145,7 @@ const Textarea = styled.textarea`
 `;
 
 const Actions = styled.div`
-    display: none;
+    display: flex;
     margin-top: 0.75rem;
     gap: 0.75rem;
-
-    &.show {
-        display: flex;
-    }
 `;

@@ -18,8 +18,10 @@ interface NoteItem extends Note {
     setText(note: string): Async<void>;
 }
 
-type NoteEntry = readonly [string, Note];
+type Stored<T> = Partial<T> & {
+    readonly timestamp?: string;
+};
 
-type StoredNote = string | Partial<Note>;
+type MaybeStored<T> = Optional<Stored<T>>;
 
-type StoredNoteEntry = readonly [string, Optional<StoredNote>];
+type Dump<T> = Record<string, Stored<T>>;

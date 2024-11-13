@@ -44,3 +44,13 @@ export function download(name: string, data: string) {
 
     URL.revokeObjectURL(url);
 }
+
+export function keyset<T extends object[]>(...objects: T) {
+    const keys = new Set<KeyOfUnion<T[number]>>();
+
+    for (const object of objects) {
+        Object.keys(object).forEach((x) => keys.add(x as any));
+    }
+
+    return keys;
+}

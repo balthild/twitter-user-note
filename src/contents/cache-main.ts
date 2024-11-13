@@ -225,9 +225,9 @@ function cacheTwitterUserDeduplicate() {
         if (!resolved) return;
 
         const id = resolved.id;
-        const key = resolved.username.toLowerCase();
         if (cached.has(id)) return;
 
+        const key = resolved.username.toLowerCase();
         await cache.users.put({
             key,
             timestamp: new Date().getTime(),

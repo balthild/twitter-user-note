@@ -1,9 +1,9 @@
 import { PlasmoCSConfig } from 'plasmo';
 
-import { normalizeNote } from '~/hooks/note-item';
 import { cache, cleanupCache } from '~/utils/cache';
 import { debug } from '~/utils/misc';
-import { storages } from '~/utils/storage';
+import { isNoteEmpty, normalizeNote } from '~/utils/note';
+import { collections } from '~/utils/storage';
 
 export const config: PlasmoCSConfig = {
     matches: ['https://twitter.com/*', 'https://x.com/*'],
@@ -18,14 +18,14 @@ function listenCacheEvent() {
         const user = await cache.users.get(event.detail.key);
         if (!user) return;
 
-        const stored = await storages.note.get<StoredNote>(event.detail.id);
-        if (!stored) return;
+        const stored = await collections.note.twitter.get(event.detail.id);
+        if (isNoteEmpty(stored)) return;
 
         let note = normalizeNote(user.value, stored);
         if (!note) return;
 
         if (stored !== note) {
-            await storages.note.set(event.detail.id, note);
+            await collections.note.twitter.set(event.detail.id, note);
             debug('Updated User Info in Note:', note);
         }
     });

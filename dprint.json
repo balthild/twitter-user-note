@@ -5,8 +5,10 @@
     "https://raw.githubusercontent.com/balthild/dotfiles/refs/heads/main/dprint/global.json"
   ],
   "includes": [
+    "keys.json",
     "src/**/*.{ts,tsx}"
   ],
+  "excludes": ["!keys.json"],
   "typescript": {
     "lineWidth": 120,
     "indentWidth": 4

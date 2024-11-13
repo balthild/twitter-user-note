@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "description": "Write short notes for twitter users.",
   "author": "Balthild <ibalthild@gmail.com>",
+  "packageManager": "yarn@4.5.1",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
@@ -15,18 +16,18 @@
     "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "dexie": "^4.0.8",
+    "dexie": "^4.0.9",
     "immer": "^10.1.1",
-    "plasmo": "0.89.3",
+    "plasmo": "0.89.4",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@types/chrome": "0.0.277",
+    "@types/chrome": "0.0.280",
     "@types/dom-navigation": "^1.0.4",
-    "@types/react": "18.3.11",
+    "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
-    "dprint": "^0.47.2",
+    "dprint": "^0.47.5",
     "typescript": "5.6.3"
   },
   "manifest": {
@@ -37,6 +38,11 @@
     "permissions": [
       "tabs",
       "storage"
-    ]
+    ],
+    "browser_specific_settings": {
+      "chrome": {
+        "key": "$CHROME_EXT_KEY"
+      }
+    }
   }
 }
